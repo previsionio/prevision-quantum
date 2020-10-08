@@ -1,0 +1,7 @@
+*.listing
+*.result
+*.avi
+__pycache__
+build
+dist
+docs/build

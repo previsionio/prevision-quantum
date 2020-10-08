@@ -1,0 +1,16 @@
+setuptools
+numpy
+tensorflow
+sympy
+matplotlib
+strawberryfields>=0.15
+pennylane
+pennylane-sf
+lightgbm
+openml
+pandas
+scikit-learn
+tqdm
+gym
+box2d-py
+imageio
