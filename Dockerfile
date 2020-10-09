@@ -4,7 +4,7 @@ FROM tensorflow/tensorflow:latest-py3
 COPY . /repos/prevision-quantum-nn
 WORKDIR /repos
 
-MAINTAINER Michel Nowak "michel.nowak@prevision.io"
+MAINTAINER prevision.io "prevision@prevision.io"
 
 # install dependencies
 RUN pip3 install --upgrade pip

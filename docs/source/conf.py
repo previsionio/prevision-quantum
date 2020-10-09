@@ -17,14 +17,14 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'prevision-qnn'
-copyright = '2020, Michel Nowak, Edgard Pierre'
-author = 'Michel Nowak, Edgard Pierre'
+project = 'prevision-quantum-nn'
+copyright = '2020, Prevision.io'
+author = 'Prevision.io'
 
 templates_path = ["_templates"]
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.0'
+release = '1.0'
 
 
 # -- General configuration ---------------------------------------------------
