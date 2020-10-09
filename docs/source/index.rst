@@ -16,11 +16,20 @@
 
 |
 
+.. image:: https://readthedocs.org/projects/prevision-quantum-nn/badge/?version=latest
+        :target: https://prevision-quantum-nn.readthedocs.io/en/latest/?badge=latest
+        :alt: Documentation Status
+
+.. image:: https://img.shields.io/github/license/previsionio/prevision-quantum
+        :alt: GitHub license
+        :target: https://github.com/previsionio/prevision-quantum/blob/master/LICENSE
+
+
 .. image:: _static/prevision-quantum.png
   :width: 100%
   :align: center
 
-Prevision-qnn is a library that allows to handle automatically quantum variational circuits.
+Prevision-quantum-nn is a library that allows to handle automatically quantum variational circuits.
 It is built over `pennylane <https://pennylane.ai/>`_, developped by `Xanadu <https://www.xanadu.ai/>`_.
 
 .. raw:: html

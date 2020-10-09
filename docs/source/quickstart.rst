@@ -7,7 +7,7 @@ Quickstart
 This section provides with the simplest API to use prevision-quantum-nn and to get started quickly.
 The easiest way to get started is to use prevision-quantum-nn **Applications**.
 
-Prevision-qnn allows you to solve two different kind of applications:
+Prevision-quantum-nn allows you to solve two different kind of applications:
 
 |
 
@@ -34,6 +34,9 @@ Prevision-qnn allows you to solve two different kind of applications:
             </div>
     </div>
 
+.. tip::
+        In order to know the capabilities of the models, try the examples stored in the ``prevision-quantum-nn/examples`` folder!
+
 First, import the library:
 
 .. code-block:: python
@@ -51,7 +54,7 @@ solve.
 Supervised learning problems
 ----------------------------
 In supervised learning tasks, you usually have a dataset encoded either into a numpy array or into a panda DataFrame.
-Prevision-qnn provides with a simple interface to get started with your data: building a ``DataSet``.
+Prevision-quantum-nn provides with a simple interface to get started with your data: building a ``DataSet``.
 
 **From a numpy array**
 
