@@ -71,7 +71,7 @@ html_theme_options = {
     # ],
 
     # If ``github_link`` is set, a GitHub icon will be shown in the top right.
-    "external_links": [ ( "Github", "https://github.com/MichelNowak1/prevision-qnn",) ]
+    "external_links": [ ( "Github", "https://github.com/previsionio/prevision-quantum",) ]
 
     # Text to show in the footer of every page.
     # "footer_text": "Prevision.io",
