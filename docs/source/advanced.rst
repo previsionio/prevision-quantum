@@ -236,7 +236,7 @@ the default behavior of applications. If you wish to change the padding paramete
 
         "padding": 0.1
 
-.. warning:: python
+.. warning::
 
         This is not recommended to change the default padding parameter for angle encoding as the features are scaled
         from 0 to pi. This feature is mainly used for amplitude encoding.
