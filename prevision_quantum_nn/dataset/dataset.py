@@ -54,8 +54,12 @@ class DataSet:
         self.val_labels = val_labels
 
         self.num_features = self.train_features.shape[1]
-        labels = np.hstack((train_labels, val_labels))
-        self.num_categories = len(np.unique(labels))
+
+        if val_labels:
+            labels = np.hstack((train_labels, val_labels))
+            self.num_categories = len(np.unique(labels))
+        else:
+            self.num_categories = len(np.unique(train_labels))
 
         return self
 
@@ -82,8 +86,12 @@ class DataSet:
         self.val_labels = val_data_frame["targets"].to_numpy()
 
         self.num_features = self.train_features.shape[1]
-        labels = np.hstack((self.train_labels, self.val_labels))
-        self.num_categories = len(np.unique(labels))
+
+        if val_labels:
+            labels = np.hstack((train_labels, val_labels))
+            self.num_categories = len(np.unique(labels))
+        else:
+            self.num_categories = len(np.unique(train_labels))
 
         return self
 
