@@ -73,8 +73,8 @@ class PhaseSpacePlotter1D(PhaseSpacePlotter):
         fig, axes = plt.subplots(1, 1)
         fig.set_size_inches(7, 7)
         phase_space_predictions = model.predict(self.x_predict)
-        colors = [(0, 0.8117647058823529, 0),
-                  (0.5803921568627451, 0, 0.9176470588235294)]
+        colors = [(120/255, 131/255, 212/255),
+                  (134/255, 212/255, 166/255)]
         if model.type_problem == "classification" or \
            model.type_problem == "multiclassification":
             axes.scatter(self.x_plot,

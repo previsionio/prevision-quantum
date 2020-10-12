@@ -39,8 +39,8 @@ class PhaseSpacePlotter:
                              "associated max components. "
                              f"provided min:{self.min} and max {self.max}")
         cmap_name = "prevision_quantum_colors"
-        colors = [(0, 0.8117647058823529, 0),
-                  (0.5803921568627451, 0, 0.9176470588235294)]
+        colors = [(120/255, 131/255, 212/255),
+                  (134/255, 212/255, 166/255)]
         n_bins = 100
         self.cmap = LinearSegmentedColormap.from_list(cmap_name,
                                                       colors,

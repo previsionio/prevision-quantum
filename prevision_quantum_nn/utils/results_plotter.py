@@ -18,13 +18,19 @@ def plot_losses(results, prefix="qnn"):
     fig, axes = plt.subplots(1, 1)
 
     # plot train loss
-    axes.plot(results["iteration"], results["train_loss"], label="train loss")
+    axes.plot(results["iteration"],
+              results["train_loss"],
+              label="train loss",
+              # purple
+              color=(120/255, 131/255, 212/255))
 
     # plot validation loss
     val_loss_results = results[results["val_loss"].notnull()]
     axes.plot(val_loss_results["iteration"],
               val_loss_results["val_loss"],
-              label="val loss")
+              label="val loss",
+              # green
+              color=(134/255, 212/255, 166/255))
 
     # set meta data
     axes.set_xlabel("iteration number")
@@ -53,7 +59,8 @@ def plot_metric(results, prefix="qnn"):
     metric_results = results[results["metric"].notnull()]
     axes.plot(metric_results["iteration"],
               metric_results["metric"],
-              label="metric")
+              label="metric",
+              color=(134/255, 212/255, 166/255))
 
     # plot metadata
     axes.set_xlabel("iteration number")
@@ -82,7 +89,10 @@ def plot_reward(results, prefix="qnn"):
     fig, axes = plt.subplots(1, 1)
 
     # plot metric
-    axes.plot(results["episode"], results["reward"], label="reward")
+    axes.plot(results["episode"],
+              results["reward"],
+              label="reward",
+              color=(134/255, 212/255, 166/255))
 
     # plot metadata
     axes.set_xlabel("episode number")
