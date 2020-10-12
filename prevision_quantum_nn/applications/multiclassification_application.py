@@ -122,7 +122,7 @@ class MultiClassificationApplication(Application):
                 self.postprocessor.plotter:
             self.postprocessor.plotter.set_validation_data(val_features, val_labels)
 
-        if val_features:
+        if val_features is not None:
             val_features = self.preprocessor.transform(val_features)
 
         # fit model

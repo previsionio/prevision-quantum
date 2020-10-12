@@ -55,7 +55,7 @@ class DataSet:
 
         self.num_features = self.train_features.shape[1]
 
-        if val_labels:
+        if val_labels is not None:
             labels = np.hstack((train_labels, val_labels))
             self.num_categories = len(np.unique(labels))
         else:
@@ -87,7 +87,7 @@ class DataSet:
 
         self.num_features = self.train_features.shape[1]
 
-        if val_labels:
+        if val_labels is not None:
             labels = np.hstack((train_labels, val_labels))
             self.num_categories = len(np.unique(labels))
         else:
