@@ -78,20 +78,20 @@ class DataSet:
             a dataset: DataSet
         """
         # train
-        self.train_features = train_data_frame.drop(targets).to_numpy()
+        self.train_features = train_data_frame.drop(columns=targets).to_numpy()
         self.train_labels = train_data_frame[targets].to_numpy()
 
         # val
-        self.val_features = train_data_frame.drop(targets).to_numpy()
-        self.val_labels = val_data_frame[target].to_numpy()
+        self.val_features = train_data_frame.drop(columns=targets).to_numpy()
+        self.val_labels = val_data_frame[targets].to_numpy()
 
         self.num_features = self.train_features.shape[1]
 
-        if val_labels is not None:
-            labels = np.hstack((train_labels, val_labels))
+        if self.val_labels is not None:
+            labels = np.hstack((self.train_labels, self.val_labels))
             self.num_categories = len(np.unique(labels))
         else:
-            self.num_categories = len(np.unique(train_labels))
+            self.num_categories = len(np.unique(self.train_labels))
 
         return self
 
