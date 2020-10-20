@@ -1,6 +1,10 @@
 <navbar @toggle-sidebar="toggleSidebar">
   <router-link to="{{pathto(master_doc)}}" class="home-link">
-      <img class="logo" src="_static/prevision_quantum_logo.png" alt="logo">
+    {% if logo %}
+      <img class="logo" src="{{ pathto('_static/' + logo, 1) }}" alt="logo"/>
+    {% else %}
+      <span class="site-name">{{ project|e }}</span>
+    {% endif %}
   </router-link>
 
   <div class="links">
