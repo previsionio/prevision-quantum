@@ -19,7 +19,7 @@ install_requirements = [
     "imageio"
 ]
 setup(name='prevision-quantum-nn',
-      version='1.0',
+      version='1.0.1',
       description='Prevision Automating Quantum Neural Networks Applications',
       author='prevision.io',
       author_email='prevision@prevision.io',
