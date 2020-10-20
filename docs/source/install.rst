@@ -22,7 +22,7 @@ The first solution to install prevision-quantum-nn is to directly install it on 
 Install with Dockerfile
 -----------------------
 
-In order to deploy prevision-quantum-nn quickly on any plateforme, we provide with a simple ``Dockerfile``.
+In order to deploy prevision-quantum-nn quickly on any platform, we provide with a simple ``Dockerfile``.
 
 First, build the image with ``docker build``:
 
