@@ -7,11 +7,11 @@ import prevision_quantum_nn as qnn
 if __name__ == "__main__":
 
     # prepare data
-    num_samples = 200
+    num_samples = 500
     X, y = datasets.make_moons(n_samples=num_samples,
                                noise=0.05, random_state=0)
     x_train, x_val, y_train, y_test = train_test_split(
-                X, y, test_size=0.25, random_state=42)
+                X, y, test_size=0.25, random_state=40)
 
     # build dataset
     dataset = qnn.get_dataset_from_numpy(x_train,
@@ -30,13 +30,14 @@ if __name__ == "__main__":
         "num_q": 5,
         "encoding": "angle",
         "use_early_stopper": True,
+        "early_stopper_patience": 20,
         "max_iterations": 10000,
         "interface": "autograd",
         "layer_type": "template",
         "snapshot_frequency": 5,
         "verbose": True,
         "prefix": "moon",
-        "num_layers": 3,
+        "num_layers": 4,
         "optimizer_name": "Adam",
         "learning_rate": 0.05,
     }
@@ -57,13 +58,6 @@ if __name__ == "__main__":
                                        preprocessing_params=preprocessing_params,
                                        model_params=model_params,
                                        postprocessing_params=postprocessing_params)
-
-    # before solving the application, save the parameters
-    # in order to be able to reload them in case of 
-    # interruption of the solve method
-    # you will still have the weights file genereated by the snapshot_frequency keyword
-    # and will be able to reload the application, with the weights you want
-    application.save_params()
 
     # solve application
     application.solve(dataset)

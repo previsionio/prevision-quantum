@@ -67,19 +67,19 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
         self.neural_network = lambda *_, **__: None
         self.backend = None
 
-    def initialize_weights(self, file_name=None):
+    def initialize_weights(self, weights_file=None):
         """ initialize weights
 
         to be implemented depending on the architecture used
         """
         raise NotImplementedError("Implement this method in doughter classe.")
 
-    def build(self):
+    def build(self, weights_file=None):
         """ builds the optimizer and initializes weights """
         super().build()
 
         self.build_optimizer()
-        self.initialize_weights()
+        self.initialize_weights(weights_file=weights_file)
         self.built = True
 
     def build_optimizer(self):
@@ -123,7 +123,10 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
             str(self.iteration) + ".npz"
 
         if self.interface == "tf":
-            tosave = [v.numpy() for v in self.var]
+            if self.architecture == "cv":
+                tosave = [v.numpy() for v in self.var]
+            else:
+                tosave = self.var.numpy()
         elif self.interface == "autograd":
             tosave = self.var
 
@@ -142,7 +145,10 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
         self.var = weights_list
 
         if self.interface == "tf":
-            self.var = [tf.Variable(v) for v in self.var]
+            if self.architecture == "cv":
+                self.var = [tf.Variable(v) for v in self.var]
+            else:
+                self.var = tf.Variable(self.var)
 
     def cost(self, var, features, labels):
         """Cost to be optimized during training.

@@ -29,9 +29,9 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
 
         self.check_encoding()
 
-    def build(self):
+    def build(self, weights_file=None):
         """ builds the backend and the device """
-        super().build()
+        super().build(weights_file=weights_file)
         # build backend
         if self.interface == "autograd":
             self.backend = "default.qubit.autograd"
@@ -77,15 +77,15 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
                              "amplitude, "
                              "mottonen")
 
-    def initialize_weights(self, file_name=None):
+    def initialize_weights(self, weights_file=None):
         """Initializes weights.
 
         Args:
-            file_name (str):option, if None, the weights will be initialized
+            weights_file (str):option, if None, the weights will be initialized
                 randomly if not None, weights will be loaded from file
         """
-        if file_name is not None:
-            var_init = self.load_weights(file_name)
+        if weights_file is not None:
+            self.load_weights(weights_file)
         else:
             if self.num_q == 1:
                 var_init = 0.05 * np.random.randn(self.num_layers,
@@ -95,9 +95,9 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
                     n_layers=self.num_layers,
                     n_wires=self.num_q)
 
-        if self.interface == "tf":
-            var_init = tf.Variable(var_init)
-        self.var = var_init
+            if self.interface == "tf":
+                var_init = tf.Variable(var_init)
+            self.var = var_init
 
     def encode_data(self, features):
         """Encodes data according to encoding method."""

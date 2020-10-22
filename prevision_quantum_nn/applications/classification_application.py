@@ -125,6 +125,10 @@ class ClassificationApplication(Application):
 
         if val_features is not None:
             val_features = self.preprocessor.transform(val_features)
+            
+        #save params and preprocessor before fit
+        self.save_params()
+        self.save_preprocessor()
 
         # fit model
         self.model.fit(train_features,

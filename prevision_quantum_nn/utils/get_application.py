@@ -1,6 +1,7 @@
 """ get application module """
 import os
 import json
+import pickle
 
 from prevision_quantum_nn.applications.classification_application \
         import ClassificationApplication
@@ -67,22 +68,28 @@ def get_application(application_type,
     return application
 
 
-def load_application(application_params, model_weights):
+def load_application(application_params, model_weights, preprocessor_file):
     """ loads application from files """
 
     if os.path.exists(application_params):
         with open(application_params, "rb") as parameters_file:
             params = json.load(parameters_file)
-        print("utils.get_model_from_parameters_file:"
-              "params loaded from file.")
+        print("params loaded from file.")
     else:
         raise ValueError(f"Application params file cannot be found: "
                          f"{application_params}")
+                         
+    if os.path.exists(preprocessor_file):
+        with open(preprocessor_file, "rb") as prepros_file:
+            loaded_preprocessor = pickle.load(prepros_file)
+        print("Preprocessor loaded from file.")
+    else:
+        print(f"Preprocessor file cannot be found: {preprocessor_file}")
 
-    application = get_application(params.get("model_params").get("TYPE_problem"))
+    application = get_application(params.get("model_params").get("type_problem"))
 
     # get preprocessor
-    application.preprocessor = Preprocessor(params.get("preprocessing_params"))
+    application.preprocessor = loaded_preprocessor
 
     # get model
     application.model = get_model(params.get("model_params"))
@@ -90,8 +97,5 @@ def load_application(application_params, model_weights):
     # get postprocessor
     application.postprocessor = Postprocessor(params.get("postprocessing_params"))
 
-    application.model.load(model_weights)
-    application.model.build()
-    application.preprocessor.build_for_model(application.model)
-
+    application.model.build(weights_file=model_weights)
     return application

@@ -121,10 +121,15 @@ class MultiClassificationApplication(Application):
         if hasattr(self.postprocessor, "plotter") and \
                 self.postprocessor.plotter:
             self.postprocessor.plotter.set_validation_data(val_features, val_labels)
+            self.postprocessor.plotter.prepare_phase_space()
 
         if val_features is not None:
             val_features = self.preprocessor.transform(val_features)
 
+        #save params and preprocessor before fit
+        self.save_params()
+        self.save_preprocessor()
+        
         # fit model
         self.model.fit(train_features,
                        train_labels,

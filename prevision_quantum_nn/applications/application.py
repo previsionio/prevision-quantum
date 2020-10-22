@@ -4,7 +4,7 @@
 
 import logging
 import json
-
+import pickle
 
 class Application:
     """Base Application class. Applications will inherite from this class.
@@ -51,14 +51,23 @@ class Application:
         params_file_name = self.prefix + "_params.json"
         with open(params_file_name, 'w') as params_file:
             json.dump(params, params_file, indent=4)
+            
+    def save_preprocessor(self):
+        """ save preprocessor into file """
+        if self.preprocessor:
+            preprocessor_file_name = self.prefix + "_preprocessor.obj"
+            with open (preprocessor_file_name, 'wb') as f:
+                pickle.dump(self.preprocessor, f)
 
     def predict(self, val_features):
         """Predict. Returns prediction of the mode
 
         Args:
-            x_val (numpy array): weights
+            val_features (numpy array): validation features
         """
-        return self.model.predict(val_features)
+        if self.preprocessor:
+            preprocessed_features = self.preprocessor.transform(val_features)
+        return self.model.predict(preprocessed_features)
 
     def log_params(self):
         """ logs parameters of the application

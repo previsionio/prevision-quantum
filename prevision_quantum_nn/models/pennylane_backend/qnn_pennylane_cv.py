@@ -31,9 +31,9 @@ class CVNeuralNetwork(PennylaneNeuralNetwork):
 
         self.check_encoding()
 
-    def build(self):
+    def build(self, weights_file=None):
         """ builds the backend and the device """
-        super().build()
+        super().build(weights_file=weights_file)
         # build backend
         # When strawberryfields.tf available in stable version,
         # will be used because faster
@@ -90,16 +90,16 @@ class CVNeuralNetwork(PennylaneNeuralNetwork):
                              "displacement, "
                              "squeezing")
 
-    def initialize_weights(self, file_name=None):
+    def initialize_weights(self, weights_file=None):
         """Initializes weights.
 
         Args:
-            file_name (str):option, if None, the weights will be initialized
+            weights_file (str):option, if None, the weights will be initialized
                 randomly if not None, weights will be loaded from file
         """
-        # if file_name is provided, load weights from file
-        if file_name is not None:
-            self.load_weights(file_name)
+        # if weights_file is provided, load weights from file
+        if weights_file is not None:
+            self.load_weights(weights_file)
         # otherwise, initalize new weights
         else:
             if self.layer_type == "custom":
@@ -138,7 +138,7 @@ class CVNeuralNetwork(PennylaneNeuralNetwork):
             else:
                 raise ValueError(f"Unknown layer type: {self.layer_type}")
 
-        self.var = var_init
+            self.var = var_init
 
     def encode_data(self, features):
         """Encodes data according to encoding method.
