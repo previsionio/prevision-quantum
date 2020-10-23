@@ -4,7 +4,7 @@
 
 import logging
 import json
-import pickle
+import dill as pickle
 
 class Application:
     """Base Application class. Applications will inherite from this class.
