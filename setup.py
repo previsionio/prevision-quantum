@@ -16,10 +16,11 @@ install_requirements = [
     "tqdm",
     "gym",
     "box2d-py",
-    "imageio"
+    "imageio",
+    "dill"
 ]
 setup(name='prevision-quantum-nn',
-      version='1.0.1',
+      version='1.0.2',
       description='Prevision Automating Quantum Neural Networks Applications',
       author='prevision.io',
       author_email='prevision@prevision.io',
