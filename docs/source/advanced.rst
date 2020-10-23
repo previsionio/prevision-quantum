@@ -348,17 +348,19 @@ And you're good to go! Additional utilies are provided so that you can save your
 Save an application
 ===================
 
-You can save an application by calling the following method:
+Applications are automatically saved by calling the following two methods:
 
 .. code-block:: python
 
         application.save_params()
+        application.save_preprocessor()
 
-A ``{prefix}_params.json`` will be created in your current folder. You will then be able to load the application from
-the parameters json file. But this is only the structure of preprocessing, model and postprocessing objects.
+A ``{prefix}_params.json`` and a ``{prefix}_preprocessor.obj``  files will be created in your current folder. 
+You will then be able to load the application from the parameters json file. But this is only the structure of 
+preprocessing, model and postprocessing objects. The preprocessor is loaded with the obj file.
 
-In order to save the weights of the model during the training phase, you can set the keywork ``"snapshot_frequency"`` in
-the model_params:
+In order to save the weights of the model during the training phase, you can set the keywork ``"snapshot_frequency"`` 
+in the model_params:
 
 .. code-block:: python
 
@@ -374,7 +376,8 @@ You can load back an application to get into production for example:
 .. code-block:: python
 
         application = qnn.load_application(application_params="moon_params.json",
-                                           weights_file="moon_weights_100.npz")
+                                           weights_file="moon_weights_100.npz"
+                                           preprocessor_file="moon_preprocessor.obj")
 
 Get into production!
 ====================
