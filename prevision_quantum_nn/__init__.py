@@ -1,5 +1,5 @@
 """prevision_quantum_nn module"""
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 from prevision_quantum_nn.utils.get_model import get_model
 from prevision_quantum_nn.utils.get_application import get_application
