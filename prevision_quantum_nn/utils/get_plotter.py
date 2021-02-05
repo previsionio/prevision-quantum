@@ -20,8 +20,12 @@ def get_plotter(params):
         plotter = PhaseSpacePlotter1D(params)
     elif dim == 2:
         plotter = PhaseSpacePlotter2D(params)
+    elif dim > 2:
+        plotter = PhaseSpacePlotter2D(params)
+        print("The dimension is bigger than 2. A PCA will be applied. "
+        f"Current dim: {dim}") 
     else:
         raise ValueError("Plotting dimension "
-                         "should be 1 or 2. "
+                         "should be 1, 2 or more. "
                          f"Currently set to {dim}")
     return plotter

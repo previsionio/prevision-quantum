@@ -40,6 +40,12 @@ if __name__=="__main__":
     }
     
     postprocessing_params = {
+        "phase_space_plotter": {
+            "dim": 4,
+            "min_max_array": [[min(X[:,0]), max(X[:,0])],
+                              [min(X[:,1]), max(X[:,1])]],
+            "prefix": "iris"
+        }
     }
                           
     # build application

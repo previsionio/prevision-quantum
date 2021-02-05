@@ -76,7 +76,7 @@ class Preprocessor:
         elif self.dimension_reduction_fitter == "pca":
             self.pca = PrincipalComponentAnalysis()
 
-        self.scaler = MinMaxScaler((0, np.pi))
+        self.scaler = None
 
         self.check_preprocessor()
         self.logger = logging.getLogger("preprocessing")
@@ -133,6 +133,11 @@ class Preprocessor:
 
         if self.rl_bounds is not None:
             self.scaler.fit_transform(rl_bounds)
+            
+        if encoding == "angle":
+            self.scaler = MinMaxScaler((0, np.pi))
+        elif encoding == "displacement":
+            self.scaler = MinMaxScaler((-1., 1.))  
 
     def fit_transform(self, features, labels):
         """Fit and transforms features.
@@ -176,7 +181,7 @@ class Preprocessor:
                 raise ValueError("Invalid dimension reduction fitter."
                                  "Please use wrapper or pca")
         # scale
-        if self.encoding == "angle":
+        if self.scaler is not None:
             features = self.scaler.fit_transform(features)
 
         # padding

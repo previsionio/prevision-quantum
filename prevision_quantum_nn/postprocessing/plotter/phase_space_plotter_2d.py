@@ -1,6 +1,7 @@
 """ phase space plotter 2D module """
 import numpy as np
 import matplotlib.pylab as plt
+from sklearn.decomposition import PCA
 from matplotlib import cm
 from prevision_quantum_nn.postprocessing.plotter.phase_space_plotter \
         import PhaseSpacePlotter
@@ -37,9 +38,6 @@ class PhaseSpacePlotter2D(PhaseSpacePlotter):
         Raises:
             ValueError if dimensions do not match 2
         """
-        if features.shape[1] != 2:
-            ValueError("X must have dimension [num_samples, 2], "
-                       f"currently have shape: {np.shape(features)}")
         self.x_val = features
         self.y_val = labels
         self.has_validation = True
@@ -57,13 +55,26 @@ class PhaseSpacePlotter2D(PhaseSpacePlotter):
             raise ValueError("min and max should have shapes(2,). "
                              f"provided {np.shape(self.min)} and "
                              f"{np.shape(self.max)}")
+        if self.dim > 2:
+            #perform PCA in order to reduce dimensions to 2.
+            pca = PCA(n_components=2)
+            self.x_val = pca.fit(self.x_val).transform(self.x_val)
+            self.min_max_array = np.array([[min(self.x_val[:,0]), 
+                                            max(self.x_val[:,0])], 
+                                           [min(self.x_val[:,1]), 
+                                            max(self.x_val[:,1])]])
+            self.min = self.min_max_array[:, 0]
+            self.max = self.min_max_array[:, 1]  
         xp_ = np.linspace(self.min[0], self.max[0],
                           self.num_samples_per_axis)
         yp_ = np.linspace(self.min[1], self.max[1],
                           self.num_samples_per_axis)
         self.xxp, self.yyp = np.meshgrid(xp_, yp_)
         self.x_plot = np.vstack((self.xxp.flatten(), self.yyp.flatten())).T
-        self.x_predict = self.preprocessor.transform(self.x_plot)
+        if self.dim > 2:
+            self.x_predict = self.preprocessor.transform(pca.inverse_transform(self.x_plot))
+        else:
+            self.x_predict = self.preprocessor.transform(self.x_plot)
 
     def plot(self, model):
         """Plot the phase space of a model predictions

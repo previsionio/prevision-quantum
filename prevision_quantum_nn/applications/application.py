@@ -60,7 +60,7 @@ class Application:
                 pickle.dump(self.preprocessor, f)
 
     def predict(self, val_features):
-        """Predict. Returns prediction of the mode
+        """Predict. Returns prediction of the model
 
         Args:
             val_features (numpy array): validation features

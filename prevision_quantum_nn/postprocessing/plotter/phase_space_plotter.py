@@ -40,7 +40,9 @@ class PhaseSpacePlotter:
                              f"provided min:{self.min} and max {self.max}")
         cmap_name = "prevision_quantum_colors"
         colors = [(120/255, 131/255, 212/255),
-                  (134/255, 212/255, 166/255)]
+                  (134/255, 212/255, 166/255),
+                  (114/255, 207/255, 233/255),
+                  (224/255, 128/255, 124/255)]
         n_bins = 100
         self.cmap = LinearSegmentedColormap.from_list(cmap_name,
                                                       colors,
@@ -50,7 +52,8 @@ class PhaseSpacePlotter:
         """ build the plotter
         """
         self.preprocessor = preprocessor
-        self.prepare_phase_space()
+        if self.dim < 3:
+            self.prepare_phase_space()   
 
     def prepare_phase_space(self):
         """ prepares phase space

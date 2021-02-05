@@ -3,6 +3,7 @@
 import tensorflow as tf
 import pennylane as qml
 import pennylane.numpy as np
+import math
 
 from prevision_quantum_nn.models.pennylane_backend.qnn_pennylane \
         import PennylaneNeuralNetwork
@@ -114,6 +115,8 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
             qml.templates.embeddings.AngleEmbedding(features,
                                                     wires=wires)
         elif self.encoding == "mottonen":
+            norm = np.sum(np.abs(features) ** 2)
+            features = features / math.sqrt(norm)
             qml.templates.state_preparations.MottonenStatePreparation(
                 features, wires=wires)
 

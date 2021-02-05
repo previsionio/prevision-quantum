@@ -311,6 +311,9 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
 
             # for prediction
             self.var = var
+            
+        # save last weights before stopping
+        self.snapshot()
 
         # print elapsed time
         elapsed_time = time.time() - start_fit
