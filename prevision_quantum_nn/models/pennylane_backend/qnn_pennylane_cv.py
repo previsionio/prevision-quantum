@@ -35,19 +35,10 @@ class CVNeuralNetwork(PennylaneNeuralNetwork):
         """ builds the backend and the device """
         super().build(weights_file=weights_file)
         # build backend
-        # When strawberryfields.tf available in stable version,
-        # will be used because faster
-        # if self.interface == "tf":
-        #    self.backend = "strawberryfields.tf"
-        # elif self.interface == "autograd":
-        if self.interface == "tf":
-            raise ValueError("Tensorflow interface for CV calculations "
-                             "will be available in prevision_quantum_nn "
-                             "when the backend strawberryfields.tf "
-                             "will be in the stable version of "
-                             "strawberryfields")
-
-        self.backend = "strawberryfields.fock"
+        if self.interface == "autograd":
+            self.backend = "strawberryfields.fock"
+        elif self.interface == "tf":
+            self.backend = "strawberryfields.tf"
 
         # build device
         self.dev = qml.device(self.backend,

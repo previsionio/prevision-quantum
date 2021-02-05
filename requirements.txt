@@ -3,7 +3,7 @@ numpy
 tensorflow
 sympy
 matplotlib
-strawberryfields>=0.15
+strawberryfields>=0.17
 pennylane
 pennylane-sf
 lightgbm

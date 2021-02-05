@@ -272,9 +272,9 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
             # early stopper
             val_loss = None
             if val_features is not None:
-                val_loss = np.asscalar(self.cost(var,
-                                                 val_features,
-                                                 val_labels))
+                val_loss = np.asscalar(np.array(self.cost(var,
+                                                          val_features,
+                                                          val_labels)))
                 if self.early_stopper:
                     stopping_criterion = \
                             self.early_stopper.update(val_loss, var)
@@ -287,7 +287,9 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
 
             # dump output
             if verbose:
-                train_loss = np.asscalar(self.cost(var, x_train, y_train))
+                train_loss = np.asscalar(np.array(self.cost(var,
+                                                            x_train,
+                                                            y_train)))
                 self.logging_iteration(val_features,
                                        val_labels,
                                        train_loss,
