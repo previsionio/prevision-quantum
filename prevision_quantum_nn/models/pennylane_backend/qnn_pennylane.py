@@ -117,10 +117,13 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
                 self.optimizer = tf.keras.optimizers.RMSProp(
                     learning_rate=self.learning_rate)
 
-    def snapshot(self):
+    def snapshot(self, is_best = False):
         """Snapshots the model to a file."""
-        current_file = self.prefix + "_weights_" + \
-            str(self.iteration) + ".npz"
+        if not is_best:
+            current_file = self.prefix + "_weights_" + \
+                str(self.iteration) + ".npz"
+        else:
+            current_file = self.prefix + "_best_weights.npz"
 
         if self.interface == "tf":
             if self.architecture == "cv":
@@ -275,7 +278,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
                 val_loss = np.asscalar(np.array(self.cost(var,
                                                           val_features,
                                                           val_labels)))
-                if self.early_stopper:
+                if self.early_stopper and self.iteration > 2*self.early_stopper_patience:
                     stopping_criterion = \
                             self.early_stopper.update(val_loss, var)
                     if stopping_criterion:
@@ -313,7 +316,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
             self.var = var
             
         # save last weights before stopping
-        self.snapshot()
+        self.snapshot(is_best = True)
 
         # print elapsed time
         elapsed_time = time.time() - start_fit

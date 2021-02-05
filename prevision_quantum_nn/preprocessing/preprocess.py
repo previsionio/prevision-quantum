@@ -80,6 +80,15 @@ class Preprocessor:
 
         self.check_preprocessor()
         self.logger = logging.getLogger("preprocessing")
+               
+    def __getstate__(self):
+        d = dict(self.__dict__)
+        del d['logger']
+        return d
+        
+    def __setstate__(self, d):
+        self.__dict__.update(d)
+        self.logger = logging.getLogger("preprocessing")
 
     def check_preprocessor(self):
         """Checks the preprocessor consistency.
@@ -222,7 +231,7 @@ class Preprocessor:
                 raise ValueError("Invalid dimension reduction fitter."
                                  "Please use wrapper or pca")
         # scale
-        if self.encoding == "angle":
+        if self.scaler is not None:
             if self.type_problem == "reinforcement_learning" and \
                     self.rl_bounds is None:
                 pass
