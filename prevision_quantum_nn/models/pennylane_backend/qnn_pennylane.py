@@ -162,30 +162,36 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
             loss: float
                 loss of the model given x
         """
-        preds = [self.neural_network(var, features=x_) for x_ in features]
+        model_output = \
+            [self.neural_network(var, features=x_) for x_ in features]
+
+        # if the interface is autograd, call custom losses
         if self.interface == "autograd":
             if self.type_problem == "regression":
-                loss = square_loss(labels, preds)
+                loss = square_loss(labels, model_output)
             elif self.type_problem == "classification":
-                loss = square_loss(labels, preds)
+                loss = square_loss(labels, model_output)
             elif self.type_problem == "multiclassification":
-                preds = np.array(preds)
-                preds = np.exp(preds)/np.sum(np.exp(preds), axis=1)[:, None]
+                model_output = np.array(model_output)
+                preds = np.exp(model_output) / \
+                        np.sum(np.exp(model_output), axis=1)[:, None]
                 loss = cross_entropy(labels, preds)
             elif self.type_problem == "reinforcement_learning":
-                loss = np.mean(square_loss(labels, preds))
+                loss = np.mean(square_loss(labels, model_output))
+
+        # if the interface if tensorflow, call tensorflow losses
         elif self.interface == "tf":
             if self.type_problem == "regression":
-                loss = square_loss(labels, preds)
+                loss = tf.math.reduce_mean(tf.losses.MSE(labels, model_output))
             elif self.type_problem == "classification":
-                loss = square_loss(labels, preds)
+                loss = tf.math.reduce_mean(tf.losses.MSE(labels, model_output))
             elif self.type_problem == "multiclassification":
                 loss = tf.reduce_mean(
-                    tf.nn.softmax_cross_entropy_with_logits(labels, preds),
-                    keepdims=True
-                )
+                    tf.nn.softmax_cross_entropy_with_logits(labels,
+                                                            model_output),
+                    keepdims=True)
             elif self.type_problem == "reinforcement_learning":
-                loss = np.mean(square_loss(labels, preds))
+                loss = tf.math.reduce_mean(tf.losses.MSE(labels, model_output))
         return loss
 
     def step(self, features, labels, var):
@@ -266,7 +272,9 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
             # early stopper
             val_loss = None
             if val_features is not None:
-                val_loss = self.cost(var, val_features, val_labels)
+                val_loss = np.asscalar(self.cost(var,
+                                                 val_features,
+                                                 val_labels))
                 if self.early_stopper:
                     stopping_criterion = \
                             self.early_stopper.update(val_loss, var)
@@ -279,7 +287,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
 
             # dump output
             if verbose:
-                train_loss = self.cost(var, x_train, y_train)
+                train_loss = np.asscalar(self.cost(var, x_train, y_train))
                 self.logging_iteration(val_features,
                                        val_labels,
                                        train_loss,
@@ -317,11 +325,45 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
             preds: float or int
                 prediction of the model
         """
-        preds = np.array([self.neural_network(self.var, features=x_)
-                          for x_ in features])
+        model_output = np.array(
+            [self.neural_network(self.var, features=x_)
+             for x_ in features])
+
         if self.type_problem == "classification":
-            preds = np.where(preds > 0.5, 1, 0)
+            return np.where(model_output > 0., 1, 0)
         elif self.type_problem == "multiclassification":
-            preds = np.exp(preds)/np.sum(np.exp(preds), axis=1)[:, None]
-            preds = np.argmax(preds, axis=1)
-        return preds
+            soft_outputs = np.exp(model_output) / \
+                    np.sum(np.exp(model_output), axis=1)[:, None]
+            return np.argmax(soft_outputs, axis=1)
+        return model_output
+
+    def predict_proba(self, features):
+        """Predicts the probabilities of a prediction for an
+           array of features
+
+        Args:
+            features (array):features to be predicted
+
+        Returns:
+            preds: float or int
+                prediction of the model
+        """
+        model_output = [self.neural_network(self.var, features=x_)
+                        for x_ in features]
+
+        if self.type_problem == "classification":
+            model_output = np.array(model_output)
+            predicted_probabilities = 0.5 + 0.5 * model_output
+
+        elif self.type_problem == "multiclassification":
+            if self.interface == "autograd":
+                predicted_probabilities = np.exp(model_output) / \
+                        np.sum(np.exp(model_output), axis=1)[:, None]
+            elif self.interface == "tf":
+                predicted_probabilities = tf.nn.softmax(model_output)
+        elif self.type_problem in ["regression", "reinforcement_learning"]:
+            raise ValueError("Cannot predict probabilities when type_problem "
+                             "is set to: "
+                             "regression or reinforcement_learning")
+
+        return predicted_probabilities

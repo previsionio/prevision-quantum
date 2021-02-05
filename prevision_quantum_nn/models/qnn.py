@@ -5,8 +5,6 @@
 from sklearn.utils import resample
 import numpy as np
 from sklearn import metrics
-import tensorflow as tf
-import pennylane as qml
 import logging
 
 from prevision_quantum_nn.models.utilities.early_stopper import EarlyStopper
@@ -180,24 +178,16 @@ class QuantumNeuralNetwork:
             val_features (array):validation features
             val_labels (array):validation labels
             train_loss (float):loss of the current iteration
-            val_loss (float):loss of the current iteration
+            val_loss (float):validation loss of the current iteration
         """
-        if isinstance(train_loss, qml.numpy.tensor):
-            train_loss = train_loss[0]
-        if isinstance(val_loss, qml.numpy.tensor):
-            val_loss = val_loss[0]
-        if isinstance(train_loss, tf.Tensor):
-            train_loss = train_loss.numpy()[0]
-        if isinstance(val_loss, tf.Tensor):
-            val_loss = val_loss.numpy()[0]
 
         if val_features is not None and \
            self.iteration % self.val_verbose_period == 0:
             # classification
             if self.type_problem == "classification":
-                preds = self.predict(val_features)
-                fpr, tpr, _ = metrics.roc_curve(val_labels, preds)
-                auc = metrics.auc(fpr, tpr)
+                predicted_probabilities = self.predict_proba(val_features)
+                auc = metrics.roc_auc_score(val_labels,
+                                            predicted_probabilities)
                 self.logger.info(f"iter: {self.iteration} "
                                  f"train_loss: {train_loss:.3e} "
                                  f"val_loss: {val_loss:.3e} "
