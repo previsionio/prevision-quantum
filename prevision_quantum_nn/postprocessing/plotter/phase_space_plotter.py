@@ -40,13 +40,20 @@ class PhaseSpacePlotter:
                              f"provided min:{self.min} and max {self.max}")
         cmap_name = "prevision_quantum_colors"
         colors = [(120/255, 131/255, 212/255),
-                  (134/255, 212/255, 166/255),
-                  (114/255, 207/255, 233/255),
-                  (224/255, 128/255, 124/255)]
+                  (134/255, 212/255, 166/255)]
+        colors_multi = [(120/255, 131/255, 212/255),
+                        (134/255, 212/255, 166/255),
+                        (114/255, 207/255, 233/255),
+                        (224/255, 128/255, 124/255)]
         n_bins = 100
-        self.cmap = LinearSegmentedColormap.from_list(cmap_name,
-                                                      colors,
-                                                      N=n_bins)
+        if self.dim <3:
+            self.cmap = LinearSegmentedColormap.from_list(cmap_name,
+                                                          colors,
+                                                          N=n_bins)
+        else:
+            self.cmap = LinearSegmentedColormap.from_list(cmap_name,
+                                                          colors_multi,
+                                                          N=n_bins)
 
     def build(self, preprocessor):
         """ build the plotter
