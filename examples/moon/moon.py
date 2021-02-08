@@ -3,6 +3,7 @@ from sklearn.model_selection import train_test_split
 
 import prevision_quantum_nn as qnn
 
+import numpy as np
 
 if __name__ == "__main__":
 
@@ -10,6 +11,8 @@ if __name__ == "__main__":
     num_samples = 500
     X, y = datasets.make_moons(n_samples=num_samples,
                                noise=0.05, random_state=0)
+    # shift label from {0, 1} to {-1, 1}
+    y = y * 2 - np.ones(len(y))                          
     x_train, x_val, y_train, y_test = train_test_split(
                 X, y, test_size=0.25, random_state=40)
 

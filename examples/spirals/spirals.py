@@ -14,7 +14,7 @@ def twospirals(turns, noise=0.7, random_state=None):
     d1x = -np.cos(n) * n + rng_sp.rand(n_points, 1) * noise
     d1y = np.sin(n) * n + rng_sp.rand(n_points, 1) * noise
     x = np.vstack((np.hstack((d1x,  d1y)),np.hstack((-d1x, -d1y))))
-    y = np.hstack((np.zeros(n_points).astype(int),np.ones(n_points).astype(int)))
+    y = np.hstack((-1*np.ones(n_points).astype(int),np.ones(n_points).astype(int)))
     return x, y
 
 if __name__ == "__main__":
@@ -28,8 +28,8 @@ if __name__ == "__main__":
     # build dataset
     dataset = qnn.get_dataset_from_numpy(x_train,
                                          y_train,
-                                         x_val=x_val,
-                                         y_val=y_test)
+                                         val_features=x_val,
+                                         val_labels=y_test)
 
     # customize preprocessing
     preprocessing_params = {
@@ -81,13 +81,5 @@ if __name__ == "__main__":
                                        preprocessing_params=preprocessing_params,
                                        model_params=model_params,
                                        postprocessing_params=postprocessing_params)
-
-    # before solving the application, save the parameters
-    # in order to be able to reload them in case of 
-    # interruption of the solve method
-    # you will still have the weights file genereated by the snapshot_frequency keyword
-    # and will be able to reload the application, with the weights you want
-    application.save_params()
-
-    # solve application
+                                       
     application.solve(dataset)
