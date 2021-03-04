@@ -96,6 +96,7 @@ def load_application(application_params, model_weights, preprocessor_file):
 
     # get postprocessor
     application.postprocessor = Postprocessor(params.get("postprocessing_params"))
+    application.postprocessor.build(application.preprocessor)
 
     application.model.build(weights_file=model_weights)
     return application
