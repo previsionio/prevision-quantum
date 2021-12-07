@@ -1,4 +1,3 @@
-
 from sklearn import datasets
 
 import prevision_quantum_nn as qnn

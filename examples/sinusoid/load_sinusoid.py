@@ -1,4 +1,3 @@
-
 from sklearn import datasets
 import numpy as np
 
@@ -11,7 +10,7 @@ if __name__ == "__main__":
     application = qnn.load_application(application_params,
                                        model_weights=model_weights,
                                        preprocessor_file=preprocessor_file)
-    train_features = np.linspace(-1.*np.pi, 1.*np.pi, 50)
+    train_features = np.linspace(-1. * np.pi, 1. * np.pi, 50)
     train_features = train_features / np.pi
     train_features = train_features.reshape((len(train_features), 1))
     print(application.predict(train_features))

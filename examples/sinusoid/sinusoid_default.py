@@ -3,9 +3,7 @@ import matplotlib.pylab as plt
 
 import prevision_quantum_nn as qnn
 
-
-if __name__=="__main__":
-
+if __name__ == "__main__":
     # prepare data
     train_features = np.linspace(0, np.pi, 50)
     train_labels = np.asarray(np.sin(train_features))

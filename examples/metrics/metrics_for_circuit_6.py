@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     descriptor_params = {
         "descriptor_type": "expressibility",
-        #"variables_sample_size": 1000,
+        # "variables_sample_size": 1000,
     }
 
     prefix = f"ct{model_params['layer_name'].split('_')[-1]}-" \

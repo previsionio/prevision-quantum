@@ -1,4 +1,3 @@
-
 import sys
 import prevision_quantum_nn as qnn
 

@@ -6,15 +6,14 @@ import prevision_quantum_nn as qnn
 import numpy as np
 
 if __name__ == "__main__":
-
     # prepare data
     num_samples = 500
     X, y = datasets.make_moons(n_samples=num_samples,
                                noise=0.05, random_state=0)
     # shift label from {0, 1} to {-1, 1}
-    y = y * 2 - np.ones(len(y))                          
+    y = y * 2 - np.ones(len(y))
     x_train, x_val, y_train, y_test = train_test_split(
-                X, y, test_size=0.25, random_state=40)
+        X, y, test_size=0.25, random_state=40)
 
     # build dataset
     dataset = qnn.get_dataset_from_numpy(x_train,
@@ -49,18 +48,18 @@ if __name__ == "__main__":
     postprocessing_params = {
         "phase_space_plotter": {
             "dim": 2,
-            "min_max_array": [[min(X[:,0]), max(X[:,0])],
-                              [min(X[:,1]), max(X[:,1])]],
+            "min_max_array": [[min(X[:, 0]), max(X[:, 0])],
+                              [min(X[:, 1]), max(X[:, 1])]],
             "prefix": "moon"
         }
     }
 
     # build application
     application = qnn.get_application("classification",
-                                       prefix="moon",
-                                       preprocessing_params=preprocessing_params,
-                                       model_params=model_params,
-                                       postprocessing_params=postprocessing_params)
+                                      prefix="moon",
+                                      preprocessing_params=preprocessing_params,
+                                      model_params=model_params,
+                                      postprocessing_params=postprocessing_params)
 
     # solve application
     application.solve(dataset)

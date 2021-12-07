@@ -3,7 +3,6 @@ import openml as oml
 
 import prevision_quantum_nn as qnn
 
-
 if __name__ == "__main__":
     """
     OpenML dataset_id: 1462
