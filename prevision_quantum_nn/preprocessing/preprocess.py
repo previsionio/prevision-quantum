@@ -327,6 +327,8 @@ class Preprocessor:
             padding_dim = 2 ** self.num_q - num_features
         elif self.encoding in ["angle", "displacement", "squeezing"]:
             padding_dim = self.num_q - num_features
+        else:
+            padding_dim = 0
 
         # apply padding
         if padding_dim > 0:

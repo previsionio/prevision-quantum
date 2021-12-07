@@ -25,14 +25,9 @@ class ExpressibilityDescriptor(BaseDescriptor):
         super().__init__(params=params)
         # todo: put a lot of these things in super() method
         #  and maybe add some intermediate classes
-        self.model = None
-        self.input_size = self.params.get("input_size", None)
-        self.type = "deep"
-        self.variables_range = params.get("variables_range", [0, 2 * np.pi])
-        self.variables_sample_size = params.get("variables_sample_size", 5000)
-        self.variables_seed = params.get("variables_seed", 0)
+
         self.n_bins = params.get("n_bins", 75)
-        self.variables_generator = lambda *_, **__: []
+
 
     def build_for_model(self, variables_shape, num_q):
         self.num_q = num_q
@@ -44,7 +39,7 @@ class ExpressibilityDescriptor(BaseDescriptor):
 
         self.variables_generator = variables_generator
 
-    def fidelities(self, circuit, data, **kwargs):
+    def fidelities(self, circuit, data):
         fids = []
         np.random.seed(self.variables_seed)
 
@@ -61,8 +56,7 @@ class ExpressibilityDescriptor(BaseDescriptor):
 
         return np.array(fids)
 
-    def compute(self, circuit, dataset=None, data=None,
-                **kwargs):
+    def compute(self, circuit, dataset=None, data=None):
 
         if dataset is None:
             if data is None:
@@ -72,7 +66,7 @@ class ExpressibilityDescriptor(BaseDescriptor):
 
         expressibilities = []
         for data in dataset:
-            fids = self.fidelities(circuit, data, **kwargs)
+            fids = self.fidelities(circuit, data)
 
             P = density_probability(fids, self.n_bins)
 

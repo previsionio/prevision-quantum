@@ -130,6 +130,7 @@ class DescriptorApplication(Application):
         Args:
             dataset (DataSet):dataset to be solved with this application
         """
+        # todo: allow dataset is None for no_encoding
 
         self.dataset = dataset
 
@@ -142,23 +143,20 @@ class DescriptorApplication(Application):
                              "discrete architecture for now")
 
         # preprocess data
-        # features = self.preprocessor.fit_transform(dataset, [])
         features = None
         if self.dataset:
-            features = self.dataset.train_features
+            features = self.preprocessor.fit_transform(dataset.train_features,
+                                                       [])
 
         # build postprocessor
-        # self.postprocessor.build(self.preprocessor)
+        self.postprocessor.build(self.preprocessor)
 
         # save params and preprocessor before computing descriptor
-        # self.save_params()
-        # self.save_preprocessor()
+        self.save_params()
+        self.save_preprocessor()
 
         # compute descriptor
-
-        descriptor_value = self.descriptor.compute(
-            self.model.neural_network,
-            dataset=features
-        )
+        descriptor_value = self.descriptor.compute(self.model.neural_network,
+                                                   dataset=features)
 
         return descriptor_value
