@@ -72,7 +72,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
 
         to be implemented depending on the architecture used
         """
-        raise NotImplementedError("Implement this method in doughter classe.")
+        raise NotImplementedError("Implement this method in daughter class.")
 
     def build(self, weights_file=None):
         """ builds the optimizer and initializes weights """

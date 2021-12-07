@@ -5,6 +5,8 @@ import pennylane as qml
 import pennylane.numpy as np
 import math
 
+from prevision_quantum_nn.models.pennylane_backend.pennylane_ansatz import \
+    AnsatzBuilder
 from prevision_quantum_nn.models.pennylane_backend.qnn_pennylane \
         import PennylaneNeuralNetwork
 
@@ -27,19 +29,17 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
         self.architecture_type = "discrete"
         self.encoding = self.params.get("encoding", "angle")
         self.backend = self.params.get("backend", "default.qubit.tf")
+        self.layer_name = self.params.get("layer_name",
+                                          "StronglyEntanglingLayers")
 
         self.check_encoding()
 
-    def build(self, weights_file=None):
-        """ builds the backend and the device """
-        super().build(weights_file=weights_file)
-        # build backend
-        if self.interface == "autograd":
-            self.backend = "default.qubit.autograd"
-        elif self.interface == "tf":
-            self.backend = "default.qubit.tf"
-        # build device
-        self.dev = qml.device(self.backend, wires=self.num_q)
+    def build_model(self):
+        """ builds the device and the qnode"""
+        self.ansatz_builder = AnsatzBuilder(self.num_q,
+                                            self.num_layers,
+                                            self.layer_name)
+        self.ansatz_builder.build()
 
         def neural_network(var, features=None):
             """Neural_network, decorated by a pennylane qnode.
@@ -61,7 +61,20 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
 
             return self.output_layer()
 
-        self.neural_network = qml.QNode(neural_network,
+        self.ansatz = neural_network
+
+    def build(self, weights_file=None):
+        """ builds the backend and the device """
+        super().build(weights_file=weights_file)
+        # build backend
+        if self.interface == "autograd":
+            self.backend = "default.qubit.autograd"
+        elif self.interface == "tf":
+            self.backend = "default.qubit.tf"
+        # build device
+        self.dev = qml.device(self.backend, wires=self.num_q)
+
+        self.neural_network = qml.QNode(self.ansatz,
                                         self.dev,
                                         interface=self.interface)
 
@@ -71,12 +84,10 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
         Raises:
             ValueError if invalid encoding for qubit calculation
         """
-        if self.encoding not in ["angle", "amplitude", "mottonen"]:
+        valid_encoding = ["angle", "amplitude", "mottonen", "no_encoding"]
+        if self.encoding not in valid_encoding:
             raise ValueError("Invalid encoding for qubit neural network. "
-                             "Valid encoding are: "
-                             "angle, "
-                             "amplitude, "
-                             "mottonen")
+                             f"Valid encoding are: {', '.join(valid_encoding)}")
 
     def initialize_weights(self, weights_file=None):
         """Initializes weights.
@@ -88,13 +99,10 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
         if weights_file is not None:
             self.load_weights(weights_file)
         else:
-            if self.num_q == 1:
-                var_init = 0.05 * np.random.randn(self.num_layers,
-                                                  3 * self.num_q)
-            else:
-                var_init = qml.init.strong_ent_layers_uniform(
-                    n_layers=self.num_layers,
-                    n_wires=self.num_q)
+            low, high = self.ansatz_builder.variables_range
+            var_shape = self.ansatz_builder.variables_shape
+
+            var_init = np.random.uniform(low=low, high=high, size=var_shape)
 
             if self.interface == "tf":
                 var_init = tf.Variable(var_init)
@@ -119,6 +127,8 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
             features = features / math.sqrt(norm)
             qml.templates.state_preparations.MottonenStatePreparation(
                 features, wires=wires)
+        elif self.encoding == "no_encoding":
+            pass
 
     def layers(self, variables):
         """Layers of the model.
@@ -129,17 +139,22 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
         Args:
             variables (list):weights of the model
         """
-        # custom layer
+
+        # todo: remove this condition, it is similar to StronglyEntanglingLayers
         if self.num_q == 1:
             for var in variables:
                 for k in range(self.num_q):
                     qml.Rot(var[0], var[1], var[2], wires=k)
+
+        # custom layer
+        if self.layer_type == "custom":
+            # todo: implement custom layers
+            pass
         # template layer
+        elif self.layer_type == "template":
+            self.ansatz_builder.ansatz(variables)
         else:
-            qml.templates.layers.StronglyEntanglingLayers(
-                variables,
-                wires=range(self.num_q)
-            )
+            raise ValueError(f"Unrecognized layer_type: {self.layer_type}")
 
     def output_layer(self):
         """Output layer.
@@ -155,4 +170,6 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
                 self.type_problem == "reinforcement_learning":
             expectations = [qml.expval(qml.PauliZ(i))
                             for i in range(self.num_categories)]
+        elif self.type_problem == "descriptor_computation":
+            expectations = qml.state()
         return expectations

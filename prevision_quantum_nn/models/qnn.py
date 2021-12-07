@@ -52,6 +52,7 @@ class QuantumNeuralNetwork:
         save (bool):if True, the model will save at the end of fit
         prefix (str):name of the file to which the output should go to
     """
+
     def __init__(self, params):
         """
         Args:
@@ -92,6 +93,7 @@ class QuantumNeuralNetwork:
             self.build_early_stopper()
 
         self.check_model()
+        self.build_model()
 
         self.built = True
 
@@ -111,9 +113,10 @@ class QuantumNeuralNetwork:
         if self.type_problem == "reinforcement_learning":
             self.num_categories = self.num_actions
 
-        if self.type_problem != "regression":
+        if self.type_problem != "regression" and \
+                self.type_problem != "descriptor_computation":
             if not isinstance(self.num_categories, int) or \
-               self.num_categories < 1:
+                    self.num_categories < 1:
                 raise ValueError("num_categories must be a positive integer")
 
         if self.type_problem == "regression" and \
@@ -136,13 +139,16 @@ class QuantumNeuralNetwork:
         if not isinstance(self.use_early_stopper, bool):
             raise ValueError("use_early_stopper must be True or False")
 
-        if self.type_problem not in ["classification", "multiclassification",
-                                     "regression", "reinforcement_learning"]:
+        possible_problem = ["classification", "multiclassification",
+                            "regression", "reinforcement_learning",
+                            "descriptor_computation"]
+        if self.type_problem not in possible_problem:
             raise ValueError("Non valid problem type. Possible options are: "
-                             "classification, "
-                             "multiclassification, "
-                             "regression, "
-                             "reinforcement_learning")
+                             ", ".join(possible_problem))
+
+    def build_model(self):
+        """ builds the model """
+        raise NotImplementedError("Implement this method in daughter class.")
 
     def build_early_stopper(self):
         """Builds the early stoppe."""
@@ -182,7 +188,7 @@ class QuantumNeuralNetwork:
         """
 
         if val_features is not None and \
-           self.iteration % self.val_verbose_period == 0:
+                self.iteration % self.val_verbose_period == 0:
             # classification
             if self.type_problem == "classification":
                 predicted_probabilities = self.predict_proba(val_features)
@@ -197,7 +203,7 @@ class QuantumNeuralNetwork:
             elif self.type_problem == "multiclassification":
                 preds = self.predict(val_features)
                 accuracy = metrics.accuracy_score(
-                        np.argmax(val_labels, axis=1), preds)
+                    np.argmax(val_labels, axis=1), preds)
                 self.logger.info(f"iter: {self.iteration} "
                                  f"train_loss: {train_loss:.3e} "
                                  f"val_loss: {val_loss:.3e} "

@@ -11,6 +11,8 @@ from prevision_quantum_nn.applications.regression_application \
         import RegressionApplication
 from prevision_quantum_nn.applications.reinforcement_learning_application \
         import ReinforcementLearningApplication
+from prevision_quantum_nn.applications.descriptor_application \
+        import DescriptorApplication
 from prevision_quantum_nn.utils.get_model import get_model
 from prevision_quantum_nn.preprocessing.preprocess import Preprocessor
 from prevision_quantum_nn.postprocessing.postprocess import Postprocessor
@@ -21,6 +23,7 @@ def get_application(application_type,
                     preprocessing_params=None,
                     model_params=None,
                     postprocessing_params=None,
+                    descriptor_params=None,
                     rl_learner_type="quantum"):
     """Get application.
 
@@ -62,6 +65,13 @@ def get_application(application_type,
             model_params,
             postprocessing_params,
             rl_learner_type=rl_learner_type)
+    elif application_type == "descriptor_computation":
+        application = DescriptorApplication(
+            prefix,
+            preprocessing_params,
+            model_params,
+            postprocessing_params,
+            descriptor_params=descriptor_params)
     else:
         raise ValueError(f"No such type of application {application_type}")
 
@@ -86,7 +96,8 @@ def load_application(application_params, model_weights, preprocessor_file):
     else:
         print(f"Preprocessor file cannot be found: {preprocessor_file}")
 
-    application = get_application(params.get("model_params").get("type_problem"))
+    application = get_application(
+        params.get("model_params").get("type_problem"))
 
     # get preprocessor
     application.preprocessor = loaded_preprocessor
