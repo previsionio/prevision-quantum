@@ -1,7 +1,6 @@
 """ classification application module
     provides with the class for classification applications
 """
-import pennylane.numpy as np
 
 from prevision_quantum_nn.applications.application import Application
 from prevision_quantum_nn.preprocessing.preprocess import Preprocessor
@@ -21,6 +20,7 @@ class DescriptorApplication(Application):
         postprocessor (Postprocessor):postprocessor to be used to
             solve the application
     """
+
     def __init__(self,
                  prefix="qnn",
                  preprocessing_params=None,
@@ -85,7 +85,6 @@ class DescriptorApplication(Application):
         self.postprocessor = Postprocessor(postprocessing_params)
         self.descriptor = get_descriptor(descriptor_params)
 
-
     def build(self):
         """ builds the application according to dataset characteristics """
 
@@ -112,15 +111,15 @@ class DescriptorApplication(Application):
                                           self.model.num_q,
                                           self.model.type_problem)
 
-        self.descriptor.build_for_model(self.model.ansatz_builder.variables_shape,
-                                        self.model.num_q)
+        self.descriptor.build_for_model(
+            self.model.ansatz_builder.variables_shape,
+            self.model.num_q)
 
         if self.model.num_q > self.max_num_q:
             raise ValueError("Too many qubits required for "
                              "this calculation: "
                              f"{self.model.num_q} > {self.max_num_q} "
                              "(maximum)")
-
 
         self.logger.info("successfully built")
         self.log_params()
@@ -151,7 +150,7 @@ class DescriptorApplication(Application):
         # build postprocessor
         # self.postprocessor.build(self.preprocessor)
 
-        #save params and preprocessor before computing descriptor
+        # save params and preprocessor before computing descriptor
         # self.save_params()
         # self.save_preprocessor()
 

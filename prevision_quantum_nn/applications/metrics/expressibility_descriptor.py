@@ -106,4 +106,3 @@ def density_probability(fids, n_bins):
     hist_fids, bin_edges = np.histogram(fids, bins=n_bins, range=[0, 1])
 
     return hist_fids / np.sum(hist_fids)
-

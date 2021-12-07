@@ -19,6 +19,7 @@ class MultiClassificationApplication(Application):
         postprocessor (Postprocessor):postprocessor to be used to
             solve the application
     """
+
     def __init__(self,
                  prefix="qnn",
                  preprocessing_params=None,
@@ -113,23 +114,25 @@ class MultiClassificationApplication(Application):
             self.dataset.to_numpy()
 
         # preprocess data
-        train_features = self.preprocessor.fit_transform(train_features, train_labels)
+        train_features = self.preprocessor.fit_transform(train_features,
+                                                         train_labels)
 
         # set validation data for plotter before preprocessing x_val
         # but after fit_transform
         self.postprocessor.build(preprocessor=self.preprocessor)
         if hasattr(self.postprocessor, "plotter") and \
                 self.postprocessor.plotter:
-            self.postprocessor.plotter.set_validation_data(val_features, val_labels)
+            self.postprocessor.plotter.set_validation_data(val_features,
+                                                           val_labels)
             self.postprocessor.plotter.prepare_phase_space()
 
         if val_features is not None:
             val_features = self.preprocessor.transform(val_features)
 
-        #save params and preprocessor before fit
+        # save params and preprocessor before fit
         self.save_params()
         self.save_preprocessor()
-        
+
         # fit model
         self.model.fit(train_features,
                        train_labels,

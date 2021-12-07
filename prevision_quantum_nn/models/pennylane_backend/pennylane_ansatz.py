@@ -94,7 +94,8 @@ class AnsatzBuilder:
                 for i in range(n - 1, -1, -1):
                     for j in range(n - 1, -1, -1):
                         if i != j:
-                            qml.CRZ(var[ind], wires=[self.wires[i], self.wires[j]])
+                            qml.CRZ(var[ind],
+                                    wires=[self.wires[i], self.wires[j]])
                             ind += 1
 
                 qml.broadcast(qml.RX, self.wires, "single",
@@ -115,7 +116,8 @@ class AnsatzBuilder:
                 for i in range(n - 1, -1, -1):
                     for j in range(n - 1, -1, -1):
                         if i != j:
-                            qml.CRX(var[ind], wires=[self.wires[i], self.wires[j]])
+                            qml.CRX(var[ind],
+                                    wires=[self.wires[i], self.wires[j]])
                             ind += 1
 
                 qml.broadcast(qml.RX, self.wires, "single",

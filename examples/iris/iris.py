@@ -48,10 +48,11 @@ if __name__ == "__main__":
     }
 
     # build application
-    application = qnn.get_application("multiclassification",
-                                      prefix="iris",
-                                      preprocessing_params=preprocessing_params,
-                                      model_params=model_params,
-                                      postprocessing_params=postprocessing_params)
+    application = qnn.get_application(
+        "multiclassification",
+        prefix="iris",
+        preprocessing_params=preprocessing_params,
+        model_params=model_params,
+        postprocessing_params=postprocessing_params)
 
     application.solve(dataset)

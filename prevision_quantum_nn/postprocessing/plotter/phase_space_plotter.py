@@ -46,7 +46,7 @@ class PhaseSpacePlotter:
                         (114/255, 207/255, 233/255),
                         (224/255, 128/255, 124/255)]
         n_bins = 100
-        if self.dim <3:
+        if self.dim < 3:
             self.cmap = LinearSegmentedColormap.from_list(cmap_name,
                                                           colors,
                                                           N=n_bins)
@@ -60,7 +60,7 @@ class PhaseSpacePlotter:
         """
         self.preprocessor = preprocessor
         if self.dim < 3:
-            self.prepare_phase_space()   
+            self.prepare_phase_space()
 
     def prepare_phase_space(self):
         """ prepares phase space

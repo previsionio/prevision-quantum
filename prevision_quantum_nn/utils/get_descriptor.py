@@ -1,7 +1,7 @@
 """ get descriptor module """
 
-from prevision_quantum_nn.applications.metrics.expressibility_descriptor import \
-    ExpressibilityDescriptor
+from prevision_quantum_nn.applications.metrics.expressibility_descriptor \
+    import ExpressibilityDescriptor
 
 
 def get_descriptor(params):

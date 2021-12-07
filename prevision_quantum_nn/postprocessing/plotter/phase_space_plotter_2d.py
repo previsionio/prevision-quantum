@@ -56,13 +56,13 @@ class PhaseSpacePlotter2D(PhaseSpacePlotter):
                              f"provided {np.shape(self.min)} and "
                              f"{np.shape(self.max)}")
         if self.dim > 2:
-            #perform PCA in order to reduce dimensions to 2.
+            # perform PCA in order to reduce dimensions to 2.
             pca = PCA(n_components=2)
             self.x_val = pca.fit(self.x_val).transform(self.x_val)
-            self.min_max_array = np.array([[min(self.x_val[:,0]), 
-                                            max(self.x_val[:,0])], 
-                                           [min(self.x_val[:,1]), 
-                                            max(self.x_val[:,1])]])
+            self.min_max_array = np.array([[min(self.x_val[:, 0]),
+                                            max(self.x_val[:, 0])],
+                                           [min(self.x_val[:, 1]),
+                                            max(self.x_val[:, 1])]])
             self.min = self.min_max_array[:, 0]
             self.max = self.min_max_array[:, 1]  
         xp_ = np.linspace(self.min[0], self.max[0],
@@ -72,7 +72,8 @@ class PhaseSpacePlotter2D(PhaseSpacePlotter):
         self.xxp, self.yyp = np.meshgrid(xp_, yp_)
         self.x_plot = np.vstack((self.xxp.flatten(), self.yyp.flatten())).T
         if self.dim > 2:
-            self.x_predict = self.preprocessor.transform(pca.inverse_transform(self.x_plot))
+            self.x_predict = self.preprocessor.transform(
+                pca.inverse_transform(self.x_plot))
         else:
             self.x_predict = self.preprocessor.transform(self.x_plot)
 

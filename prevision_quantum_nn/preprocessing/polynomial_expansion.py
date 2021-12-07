@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.preprocessing import PolynomialFeatures
 
 
-class PolynomialExpander():
+class PolynomialExpander:
     """Class PolynomialExpander: expands features.
 
     Attributes:

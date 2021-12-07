@@ -278,7 +278,8 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
                 val_loss = np.asscalar(np.array(self.cost(var,
                                                           val_features,
                                                           val_labels)))
-                if self.early_stopper and self.iteration > 2*self.early_stopper_patience:
+                if self.early_stopper and \
+                        self.iteration > 2*self.early_stopper_patience:
                     stopping_criterion = \
                             self.early_stopper.update(val_loss, var)
                     if stopping_criterion:
