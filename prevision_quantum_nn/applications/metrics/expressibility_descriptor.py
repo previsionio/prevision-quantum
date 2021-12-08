@@ -23,11 +23,9 @@ class ExpressibilityDescriptor(BaseDescriptor):
                 of the DeepQLearner
         """
         super().__init__(params=params)
-        # todo: put a lot of these things in super() method
-        #  and maybe add some intermediate classes
+        # todo: maybe add some intermediate classes
 
         self.n_bins = params.get("n_bins", 75)
-
 
     def build_for_model(self, variables_shape, num_q):
         self.num_q = num_q

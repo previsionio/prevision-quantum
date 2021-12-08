@@ -2,6 +2,8 @@
 
 from prevision_quantum_nn.applications.metrics.expressibility_descriptor \
     import ExpressibilityDescriptor
+from prevision_quantum_nn.applications.metrics.entanglement_descriptor \
+    import EntanglementDescriptor
 
 
 def get_descriptor(params):
@@ -18,10 +20,12 @@ def get_descriptor(params):
 
     if descriptor_type == "expressibility":
         descriptor = ExpressibilityDescriptor(params)
+    elif descriptor_type in EntanglementDescriptor.descriptor_types:
+        descriptor = EntanglementDescriptor(params)
     else:
         raise ValueError("Invalid descriptor type. "
-                         "Choices are expressibility, entangling capability "
-                         "or concentratable entanglement")
+                         "Choices are expressibility, entangling_capability "
+                         "or concentratable_entanglement")
     return descriptor
 
 
