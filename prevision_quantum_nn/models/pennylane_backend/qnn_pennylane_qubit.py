@@ -140,12 +140,6 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
             variables (list):weights of the model
         """
 
-        # todo: remove this condition, it is similar to StronglyEntanglingLayers
-        if self.num_q == 1:
-            for var in variables:
-                for k in range(self.num_q):
-                    qml.Rot(var[0], var[1], var[2], wires=k)
-
         # custom layer
         if self.layer_type == "custom":
             # todo: implement custom layers
