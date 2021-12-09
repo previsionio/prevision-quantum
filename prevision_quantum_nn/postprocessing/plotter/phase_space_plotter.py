@@ -67,4 +67,4 @@ class PhaseSpacePlotter:
 
         to be overridden
         """
-        raise NotImplementedError("Implement in doughter class.")
+        raise NotImplementedError("Implement in daughter class.")

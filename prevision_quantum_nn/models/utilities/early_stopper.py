@@ -18,7 +18,7 @@ class EarlyStopper():
         buffer (queue):keeps the weights of the models until
             early stopper criterion is met
     """
-    def __init__(self, window=10):
+    def __init__(self, window=10, epsilon=1E-4):
         """Constructor.
 
         Args:
@@ -26,10 +26,11 @@ class EarlyStopper():
                 which the early stopper will keep in memory the variables
         """
         self.window = window
+        self.epsilon = epsilon
+
         self.val_losses = []
         self.best_var = None
         self.best_val_loss = np.Infinity
-        self.epsilon = 1E-4
         self.buffer = queue.Queue(self.window)
 
     def add_validation_loss(self, loss):

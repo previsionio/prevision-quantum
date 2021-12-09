@@ -83,10 +83,12 @@ class QuantumNeuralNetwork:
         self.snapshot_frequency = self.params.get("snapshot_frequency", 0)
         self.type_problem = self.params.get("type_problem", None)
         self.batch_size = self.params.get("batch_size", 1)
-        self.use_early_stopper = self.params.get("use_early_stopper", True)
         self.val_verbose_period = self.params.get("val_verbose_period", 1)
+        self.use_early_stopper = self.params.get("use_early_stopper", True)
         self.early_stopper_patience = self.params.get(
             "early_stopper_patience", 20)
+        self.early_stopper_epsilon = self.params.get("early_stopper_epsilon",
+                                                     1E-4)
         self.prefix = self.params.get("prefix", "qnn")
 
         if self.use_early_stopper:
@@ -151,12 +153,13 @@ class QuantumNeuralNetwork:
         raise NotImplementedError("Implement this method in daughter class.")
 
     def build_early_stopper(self):
-        """Builds the early stoppe."""
+        """Builds the early stopper."""
         if not isinstance(self.early_stopper_patience, int) or \
                 self.early_stopper_patience < 1:
             raise ValueError("early_stopper_patience must be "
                              "a positive integer")
-        self.early_stopper = EarlyStopper(window=self.early_stopper_patience)
+        self.early_stopper = EarlyStopper(window=self.early_stopper_patience,
+                                          epsilon=self.early_stopper_epsilon)
 
     def get_random_batch(self, features, labels, batch_size):
         """Get random batch.
