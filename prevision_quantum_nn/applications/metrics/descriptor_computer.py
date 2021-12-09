@@ -40,7 +40,7 @@ def concentratable_entanglement_state(state, dim, alpha_set=None):
 
     concent = 1 - sum_purity / len(alpha_set)
 
-    return float(concent)
+    return concent.real
 
 
 class DescriptorComputer:

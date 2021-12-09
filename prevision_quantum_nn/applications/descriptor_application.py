@@ -8,7 +8,7 @@ from prevision_quantum_nn.applications.metrics.descriptor_computer import \
 from prevision_quantum_nn.preprocessing.preprocess import Preprocessor
 from prevision_quantum_nn.postprocessing.postprocess import Postprocessor
 from prevision_quantum_nn.utils.get_model import get_model
-
+import warnings
 
 class DescriptorApplication(Application):
     """Classification Application.
@@ -89,18 +89,7 @@ class DescriptorApplication(Application):
         """ builds the application according to dataset characteristics """
 
         # get dataset information
-        if self.dataset:
-            unused_variables = []
-            if self.dataset.train_labels is not None:
-                unused_variables.append("train_labels")
-            if self.dataset.val_features is not None:
-                unused_variables.append("val_features")
-            if self.dataset.val_labels is not None:
-                unused_variables.append("val_labels")
-            if unused_variables:
-                unused_variables = ", ".join(unused_variables)
-                raise Warning(f"Unused variables: {unused_variables}. "
-                              f"Not needed for descriptor computation")
+        # nothing to do
 
         # build model
         self.model.build()
@@ -124,13 +113,14 @@ class DescriptorApplication(Application):
         self.logger.info("successfully built")
         self.log_params()
 
-    def compute(self, dataset=None, descriptor_type="expressibility"):
+    def compute(self, dataset=None, descriptor_type="expressibility",
+                data_sample_size = 50):
         """Computes the descriptor given a certain dataset.
 
         Args:
             dataset (DataSet):dataset to be solved with this application
         """
-        # todo: allow dataset is None for no_encoding
+        # todo: print intermediate results in logger
 
         self.dataset = dataset
         self.descriptor_type = descriptor_type
@@ -146,8 +136,8 @@ class DescriptorApplication(Application):
         # preprocess data
         features = None
         if self.dataset:
-            features = self.preprocessor.fit_transform(dataset.train_features,
-                                                       [])
+            features, y = dataset.sample(data_sample_size)
+            features = self.preprocessor.fit_transform(features, y)
 
         # build postprocessor
         self.postprocessor.build(self.preprocessor)

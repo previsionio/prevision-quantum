@@ -3,12 +3,13 @@ import numpy as np
 
 if __name__ == "__main__":
 
-
     # prepare data
     data_sample_size = 1
     X = 2 * np.pi * np.random.random((data_sample_size, 2))
     dataset = qnn.get_dataset_from_numpy(X, None)
 
+    # todo: function get_model_params with all possible arguments,
+    #  so that fields are automatically suggested
     # customize model
     model_params = {
         "architecture": "qubit",
@@ -20,7 +21,7 @@ if __name__ == "__main__":
     }
 
     descriptor_params = {
-        "variables_sample_size": 100,
+        # "variables_sample_size": 100,
     }
 
     prefix = f"ct{model_params['layer_name'].split('_')[-1]}-" \
