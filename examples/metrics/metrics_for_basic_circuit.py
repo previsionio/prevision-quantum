@@ -20,7 +20,6 @@ if __name__ == "__main__":
     }
 
     descriptor_params = {
-        "descriptor_type": "expressibility",
         "variables_sample_size": 100,
     }
 
@@ -32,21 +31,10 @@ if __name__ == "__main__":
                                       prefix=prefix,
                                       model_params=model_params,
                                       descriptor_params=descriptor_params)
-    expr = application.compute(dataset)
 
-    descriptor_params = {
-        "descriptor_type": "entangling_capability",
-        "variables_sample_size": 100,
-    }
-    # build application
-    application = qnn.get_application("descriptor_computation",
-                                      prefix=prefix,
-                                      model_params=model_params,
-                                      descriptor_params=descriptor_params)
-    ent = application.compute(dataset)
+    expr = application.compute(dataset, "expressibility")
+    ent = application.compute(dataset, "entangling_capability")
 
-    # todo: faire en sorte qu'une seule appli soit nécessaire
-    #  idée : faire compute(descriptor_type)
     print(prefix)
     print(expr)
     print(ent)

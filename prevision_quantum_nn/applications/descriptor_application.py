@@ -3,9 +3,10 @@
 """
 
 from prevision_quantum_nn.applications.application import Application
+from prevision_quantum_nn.applications.metrics.descriptor_computer import \
+    DescriptorComputer
 from prevision_quantum_nn.preprocessing.preprocess import Preprocessor
 from prevision_quantum_nn.postprocessing.postprocess import Postprocessor
-from prevision_quantum_nn.utils.get_descriptor import get_descriptor
 from prevision_quantum_nn.utils.get_model import get_model
 
 
@@ -37,8 +38,7 @@ class DescriptorApplication(Application):
             "encoding": "no_encoding",
         }
         default_descriptor_params = {
-            "descriptor_type": "expressibility",
-
+            # "descriptor_type": "expressibility",
         }
 
         default_postprocessing_params = dict()
@@ -83,7 +83,7 @@ class DescriptorApplication(Application):
         self.preprocessor = Preprocessor(preprocessing_params)
         self.model = get_model(model_params)
         self.postprocessor = Postprocessor(postprocessing_params)
-        self.descriptor = get_descriptor(descriptor_params)
+        self.descriptor = DescriptorComputer(descriptor_params)
 
     def build(self):
         """ builds the application according to dataset characteristics """
@@ -124,7 +124,7 @@ class DescriptorApplication(Application):
         self.logger.info("successfully built")
         self.log_params()
 
-    def compute(self, dataset=None):
+    def compute(self, dataset=None, descriptor_type="expressibility"):
         """Computes the descriptor given a certain dataset.
 
         Args:
@@ -133,6 +133,7 @@ class DescriptorApplication(Application):
         # todo: allow dataset is None for no_encoding
 
         self.dataset = dataset
+        self.descriptor_type = descriptor_type
 
         # build application
         self.build()
@@ -156,7 +157,9 @@ class DescriptorApplication(Application):
         self.save_preprocessor()
 
         # compute descriptor
-        descriptor_value = self.descriptor.compute(self.model.neural_network,
-                                                   dataset=features)
+        descriptor_value = self.descriptor.compute(
+            self.model.neural_network,
+            dataset=features,
+            descriptor_type=self.descriptor_type)
 
         return descriptor_value

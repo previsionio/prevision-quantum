@@ -25,6 +25,7 @@ class Application:
         self.preprocessor = None
         self.model = None
         self.postprocessor = None
+        self.descriptor_computer = None
 
         # Logging configuration
         for handler in logging.root.handlers[:]:
