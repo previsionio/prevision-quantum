@@ -17,11 +17,13 @@ class AnsatzBuilder:
         num_q (int):number of qubits
     """
 
-    def __init__(self, num_q, num_layers, layer_name, variables_range=None):
+    def __init__(self, num_q, num_layers, layer_name, layer_type,
+                 variables_range=None):
         """ constructor """
         self.num_q = num_q
         self.num_layers = num_layers
         self.layer_name = layer_name
+        self.layer_type = layer_type
         self.variables_shape = None
         self.ansatz = lambda *_, **__: None
         self.wires = range(num_q)
@@ -35,9 +37,49 @@ class AnsatzBuilder:
                              f"Expected {self.variables_shape}, "
                              f"got {variables.shape}")
 
-    def build(self):
-        layer = None
-        layers = None
+    def build(self, ansatz=None, variables_shape=None):
+
+        if self.layer_type == "custom":
+            if ansatz is None :
+                raise ValueError("custom layer_type needs an ansatz")
+            if variables_shape is None:
+                raise ValueError("custom layer_type needs variables_shape")
+            self.variables_shape = variables_shape
+            self.ansatz = ansatz
+
+        elif self.layer_type == "template":
+            layers = self.get_layers()
+
+            def ansatz(variables):
+                self.check_shape(variables)
+                variables = variables.reshape(self.variables_shape)
+                layers(variables)
+
+            self.ansatz = ansatz
+
+        else:
+            raise ValueError("Invalid layer_type for ansatz building. "
+                             f"Valid layer_types are: custom, template")
+
+    def get_layers(self):
+        if self.layer_name == "StronglyEntanglingLayers":
+            self.variables_shape = qml.templates.layers. \
+                StronglyEntanglingLayers.shape(self.num_layers, self.num_q)
+
+            def layers(variables):
+                qml.templates.layers.StronglyEntanglingLayers(
+                    variables,
+                    wires=range(self.num_q)
+                )
+        else:
+            layer = self.get_layer()
+
+            def layers(variables):
+                for var in variables:
+                    layer(var)
+        return layers
+
+    def get_layer(self):
         n = self.num_q
         if self.layer_name == "basic_circuit_1":
             self.variables_shape = (self.num_layers, self.num_q, 2)
@@ -224,27 +266,11 @@ class AnsatzBuilder:
                 qml.broadcast(qml.RZ, self.wires, "single", var[n:2 * n])
                 qml.broadcast(gate, self.wires, pattern, var[2 * n:])
 
-        elif self.layer_name == "StronglyEntanglingLayers":
-            self.variables_shape = qml.templates.layers.\
-                StronglyEntanglingLayers.shape(self.num_layers, self.num_q)
+        else:
+            raise ValueError(f"No ansatz corresponding to layer name: "
+                             f"{self.layer_name}")
 
-            def layers(variables):
-                qml.templates.layers.StronglyEntanglingLayers(
-                    variables,
-                    wires=range(self.num_q)
-                )
-
-        if layer is not None and layers is None:
-            def layers(variables):
-                for var in variables:
-                    layer(var)
-
-        def ansatz(variables):
-            self.check_shape(variables)
-            variables = variables.reshape(self.variables_shape)
-            layers(variables)
-
-        self.ansatz = ansatz
+        return layer
 
 
 def reverse(gate):

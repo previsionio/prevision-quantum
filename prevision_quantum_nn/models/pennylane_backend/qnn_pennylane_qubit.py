@@ -31,6 +31,9 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
         self.backend = self.params.get("backend", "default.qubit.tf")
         self.layer_name = self.params.get("layer_name",
                                           "StronglyEntanglingLayers")
+        self.neural_network = self.params.get("neural_network", None)
+        self.ansatz = self.params.get("ansatz", None)
+        self.variables_shape = self.params.get("variables_shape", None)
 
         self.check_encoding()
 
@@ -38,8 +41,9 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
         """ builds the device and the qnode"""
         self.ansatz_builder = AnsatzBuilder(self.num_q,
                                             self.num_layers,
-                                            self.layer_name)
-        self.ansatz_builder.build()
+                                            self.layer_name,
+                                            self.layer_type)
+        self.ansatz_builder.build(self.ansatz, self.variables_shape)
 
         def neural_network(var, features=None):
             """Neural_network, decorated by a pennylane qnode.
@@ -57,11 +61,11 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
             self.encode_data(features)
 
             # layers
-            self.layers(var)
+            self.ansatz_builder.ansatz(var)
 
             return self.output_layer()
 
-        self.ansatz = neural_network
+        self.neural_network = neural_network
 
     def build(self, weights_file=None):
         """ builds the backend and the device """
@@ -74,7 +78,7 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
         # build device
         self.dev = qml.device(self.backend, wires=self.num_q)
 
-        self.neural_network = qml.QNode(self.ansatz,
+        self.neural_network = qml.QNode(self.neural_network,
                                         self.dev,
                                         interface=self.interface)
 
@@ -129,26 +133,6 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
                 features, wires=wires)
         elif self.encoding == "no_encoding":
             pass
-
-    def layers(self, variables):
-        """Layers of the model.
-
-        Depending on layer_type, the layers will either be
-        custom or template
-
-        Args:
-            variables (list):weights of the model
-        """
-
-        # custom layer
-        if self.layer_type == "custom":
-            # todo: implement custom layers
-            pass
-        # template layer
-        elif self.layer_type == "template":
-            self.ansatz_builder.ansatz(variables)
-        else:
-            raise ValueError(f"Unrecognized layer_type: {self.layer_type}")
 
     def output_layer(self):
         """Output layer.
