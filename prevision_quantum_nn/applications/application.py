@@ -83,7 +83,9 @@ class Application:
 
         # log model params
         self.logger.info("Model parameters:")
-        self.logger.info("\n"+json.dumps(self.model.params,
+        dico = self.model.params
+        del dico['ansatz']
+        self.logger.info("\n"+json.dumps(dico,
                                          indent=4,
                                          sort_keys=True))
 
