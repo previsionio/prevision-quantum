@@ -66,6 +66,7 @@ class Application:
         Args:
             val_features (numpy array): validation features
         """
+        # todo: something's wrong here
         if self.preprocessor:
             preprocessed_features = self.preprocessor.transform(val_features)
         return self.model.predict(preprocessed_features)
@@ -83,9 +84,11 @@ class Application:
 
         # log model params
         self.logger.info("Model parameters:")
-        dico = self.model.params
-        del dico['ansatz']
-        self.logger.info("\n"+json.dumps(dico,
+        to_dump = self.model.params
+        for key, value in list(to_dump.items()):
+            if callable(value):
+                del to_dump[key]
+        self.logger.info("\n"+json.dumps(to_dump,
                                          indent=4,
                                          sort_keys=True))
 
