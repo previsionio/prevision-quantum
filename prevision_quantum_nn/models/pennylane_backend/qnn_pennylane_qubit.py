@@ -71,16 +71,25 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
         """ builds the backend and the device """
         super().build(weights_file=weights_file)
         # build backend
-        if self.interface == "autograd":
-            self.backend = "default.qubit.autograd"
-        elif self.interface == "tf":
-            self.backend = "default.qubit.tf"
+        self.check_backend()
+
         # build device
         self.dev = qml.device(self.backend, wires=self.num_q)
 
         self.neural_network = qml.QNode(self.neural_network,
                                         self.dev,
                                         interface=self.interface)
+
+    def check_backend(self):
+        """Checks backend consistency with interface """
+        autograd_backends = ["default.qubit.autograd",
+                             "default.qubit",
+                             "lightning.qubit"]
+        if self.interface == "autograd" and \
+                self.backend not in autograd_backends:
+            self.backend = "default.qubit.autograd"
+        elif self.interface == "tf":
+            self.backend = "default.qubit.tf"
 
     def check_encoding(self):
         """Checks encoding consistency.
