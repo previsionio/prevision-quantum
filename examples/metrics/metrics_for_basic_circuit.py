@@ -6,7 +6,7 @@ if __name__ == "__main__":
     # prepare data
     data_sample_size = 1
     X = 2 * np.pi * np.random.random((data_sample_size, 2))
-    dataset = qnn.get_dataset_from_numpy(X, None)
+    dataset = qnn.get_dataset_from_numpy(X, np.zeros(data_sample_size))
 
     # todo: function get_model_params with all possible arguments,
     #  so that fields are automatically suggested

@@ -26,8 +26,16 @@ class DataSet:
         self.val_labels = None
 
     def sample(self, sample_size):
-        sample_size = min(sample_size, self.num_features)
-        index = sample(range(self.num_features), sample_size)
+        """Sample. samples the dataset
+
+        Attributes:
+            sample_size (int):number of samples wanted
+        Returns:
+            X (array)
+            y
+        """
+        sample_size = min(sample_size, len(self.train_features))
+        index = random.sample(range(len(self.train_features)), sample_size)
         X = self.train_features[index]
         y = self.train_labels[index]
         return X, y
