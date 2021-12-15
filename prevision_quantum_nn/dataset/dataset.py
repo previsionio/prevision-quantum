@@ -4,7 +4,7 @@ contains the classes to handle datasets
 """
 
 import numpy as np
-from random import sample
+import random
 
 class DataSet:
     """DataSet.
