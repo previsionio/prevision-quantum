@@ -12,8 +12,8 @@ def twospirals(turns, noise=0.7, random_state=None):
         rng_sp = np.random.RandomState(random_state)
     n_points = int(200 * turns)
     n = np.sqrt(rng_sp.rand(n_points, 1)) * turns * (2 * np.pi)
-    d1x = -np.cos(n) * n + rng_sp.rand(n_points, 1) * noise
-    d1y = np.sin(n) * n + rng_sp.rand(n_points, 1) * noise
+    d1x = -np.cos(n) * n + (rng_sp.rand(n_points, 1)-0.5) * noise
+    d1y = np.sin(n) * n + (rng_sp.rand(n_points, 1)-0.5) * noise
     x = np.vstack((np.hstack((d1x, d1y)), np.hstack((-d1x, -d1y))))
     y = np.hstack(
         (-1 * np.ones(n_points).astype(int), np.ones(n_points).astype(int)))
