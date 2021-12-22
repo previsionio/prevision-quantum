@@ -45,11 +45,11 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
         cost(self, var, features, labels)
             cost function to be optimized
     """
+
     def __init__(self, params):
         """ constructor
         Args:
-            params: dictionnary
-                parameters of the model
+            params (dict): parameters of the model
         """
         super().__init__(params)
         self.iteration = 0
@@ -117,11 +117,11 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
                 self.optimizer = tf.keras.optimizers.RMSProp(
                     learning_rate=self.learning_rate)
 
-    def snapshot(self, is_best = False):
+    def snapshot(self, is_best=False):
         """Snapshots the model to a file."""
         if not is_best:
             current_file = self.prefix + "_weights_" + \
-                str(self.iteration) + ".npz"
+                           str(self.iteration) + ".npz"
         else:
             current_file = self.prefix + "_best_weights.npz"
 
@@ -281,13 +281,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
                 if self.early_stopper and \
                         self.iteration > 2 * self.early_stopper_patience:
                     stopping_criterion = \
-                            self.early_stopper.update(val_loss, var)
-                    if stopping_criterion:
-                        var = self.early_stopper.get_best_var()
-                        best_iter = self.iteration-self.early_stopper_patience
-                        self.logger.info("early stopper stopped - "
-                                         "restoring best weights. "
-                                         f"Best iter: {best_iter}")
+                        self.early_stopper.update(val_loss, var)
 
             # dump output
             if verbose:
@@ -310,12 +304,18 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
             if plotter_callback is not None:
                 plotter_callback(self)
 
-            if not stopping_criterion:
+            if stopping_criterion:
+                var = self.early_stopper.get_best_var()
+                best_iter = self.iteration - self.early_stopper_patience
+                self.logger.info("early stopper stopped - "
+                                 "restoring best weights. "
+                                 f"Best iter: {best_iter}")
+            else:
                 self.iteration += 1
 
             # for prediction
             self.var = var
-            
+
         # save last weights before stopping
         self.snapshot(is_best=True)
 
@@ -342,7 +342,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
             return np.where(model_output > 0., 1, 0)
         elif self.type_problem == "multiclassification":
             soft_outputs = np.exp(model_output) / \
-                    np.sum(np.exp(model_output), axis=1)[:, None]
+                           np.sum(np.exp(model_output), axis=1)[:, None]
             return np.argmax(soft_outputs, axis=1)
         return model_output
 
