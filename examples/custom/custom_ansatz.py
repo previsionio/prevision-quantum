@@ -30,14 +30,21 @@ if __name__ == "__main__":
     num_q = 5
     num_layers = 2
 
-    variables_shape = (num_layers, num_q, 2)
+    n = num_q
+
+    variables_shape = (num_layers, 3 * n - 1)
 
     def ansatz(variables):
         wires = range(num_q)
+
         for var in variables:
-            qml.broadcast(qml.RX, wires, "single", parameters=var[:, 0])
-            qml.broadcast(qml.RZ, wires, "single", parameters=var[:, 1])
-            qml.broadcast(qml.CNOT, wires[::-1], "chain")
+            qml.broadcast(qml.RX, wires, "single", var[:n])
+            qml.broadcast(qml.RZ, wires, "single", var[n:2 * n])
+            ind = 2 * n
+            qml.broadcast(qml.CRZ, wires, "double",
+                          var[ind: ind + n // 2])
+            ind += n // 2
+            qml.broadcast(qml.CNOT, wires, "double_odd")
 
 
     model_params = {
@@ -52,8 +59,8 @@ if __name__ == "__main__":
     # build application
     application = qnn.get_application(
         "classification",
+        prefix="cust_atz",
         model_params=model_params)
 
     # solve application
     application.solve(dataset)
-
