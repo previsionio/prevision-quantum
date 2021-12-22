@@ -33,6 +33,13 @@ def get_application(application_type,
              2. multiclassification
              3. regression
              4. reinforcement_learning
+             5. descriptor computation
+        prefix (str): prefix to each filename
+        preprocessing_params (dict): parameters of the preprocessor
+        model_params (dict): parameters of the model
+        postprocessing_params (dict): parameters of the postprocessor
+        descriptor_params (dict): parameters of the descriptor computer
+        rl_learner_type (str): type of learner of reinforcement learning
 
     Returns:
         application: Application
@@ -106,7 +113,8 @@ def load_application(application_params, model_weights, preprocessor_file):
     application.model = get_model(params.get("model_params"))
 
     # get postprocessor
-    application.postprocessor = Postprocessor(params.get("postprocessing_params"))
+    application.postprocessor = Postprocessor(
+        params.get("postprocessing_params"))
     application.postprocessor.build(application.preprocessor)
 
     application.model.build(weights_file=model_weights)

@@ -10,7 +10,7 @@ def get_model(params):
     """Get a model according to parameters.
 
     Args:
-        params (dictionnary):parameters of the model
+        params (dictionary):parameters of the model
 
     Returns:
         model: QuantumNeuralNetwork

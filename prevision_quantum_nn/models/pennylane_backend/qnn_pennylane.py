@@ -279,7 +279,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
                                                           val_features,
                                                           val_labels)))
                 if self.early_stopper and \
-                        self.iteration > 2*self.early_stopper_patience:
+                        self.iteration > 2 * self.early_stopper_patience:
                     stopping_criterion = \
                             self.early_stopper.update(val_loss, var)
                     if stopping_criterion:
@@ -317,7 +317,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
             self.var = var
             
         # save last weights before stopping
-        self.snapshot(is_best = True)
+        self.snapshot(is_best=True)
 
         # print elapsed time
         elapsed_time = time.time() - start_fit
@@ -367,7 +367,8 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
         elif self.type_problem == "multiclassification":
             if self.interface == "autograd":
                 predicted_probabilities = np.exp(model_output) / \
-                        np.sum(np.exp(model_output), axis=1)[:, None]
+                                          np.sum(np.exp(model_output), axis=1)[
+                                          :, None]
             elif self.interface == "tf":
                 predicted_probabilities = tf.nn.softmax(model_output)
         elif self.type_problem in ["regression", "reinforcement_learning"]:

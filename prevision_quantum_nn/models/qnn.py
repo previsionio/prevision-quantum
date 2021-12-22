@@ -15,7 +15,7 @@ class QuantumNeuralNetwork:
         base class for all quantum neural networks
 
     Attributes:
-        params (dictionnary):contains the parameters of the model
+        params (dictionary):contains the parameters of the model
         use_early_stopper (bool):if True, early stopping will be activated,
             default: True
         early_stopper (EarlyStopper):early stopper that stops the run when
@@ -44,12 +44,11 @@ class QuantumNeuralNetwork:
         snapshot_frequency (int):frequency in number of iterations at which the
             model needs to snapshot
         type_problem (str):problem that is being solved, can be:
-            1. classifiation
-            2. multiclassificaiton
+            1. classification
+            2. multiclassification
             3. regression
             4. reinforcement_learning
         batch_size (int):batch size to be used for one fitting iteration
-        save (bool):if True, the model will save at the end of fit
         prefix (str):name of the file to which the output should go to
     """
 

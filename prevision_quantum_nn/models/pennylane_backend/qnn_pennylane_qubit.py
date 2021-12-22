@@ -1,4 +1,5 @@
 """ Qubit module"""
+from copy import deepcopy
 
 import tensorflow as tf
 import pennylane as qml
@@ -23,10 +24,10 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
         """Constructor.
 
         Args:
-            params (dictionnary):parameters of the model
+            params (dictionary):parameters of the model
         """
         super().__init__(params)
-        self.architecture_type = "discrete"
+        self.architecture_type = "qubit"
         self.encoding = self.params.get("encoding", "angle")
         self.backend = self.params.get("backend", "default.qubit.tf")
         self.layer_name = self.params.get("layer_name",
@@ -179,5 +180,7 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
             expectations = [qml.expval(qml.PauliZ(i))
                             for i in range(self.num_categories)]
         elif self.type_problem == "descriptor_computation":
+            # TODO: not a list of quantum observables... Doesn't work on QLACS
+            #  for instance
             expectations = qml.state()
         return expectations

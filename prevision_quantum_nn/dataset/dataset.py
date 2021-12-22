@@ -6,6 +6,7 @@ contains the classes to handle datasets
 import numpy as np
 import random
 
+
 class DataSet:
     """DataSet.
 
@@ -26,13 +27,13 @@ class DataSet:
         self.val_labels = None
 
     def sample(self, sample_size):
-        """Sample. samples the dataset
+        """Samples the arrays of features and labels of the training set
 
         Attributes:
-            sample_size (int):number of samples wanted
+            sample_size (int):number of samples
         Returns:
-            X (array)
-            y
+            X (numpy array): sampled array of features
+            y (numpy array): sampled array of labels
         """
         sample_size = min(sample_size, len(self.train_features))
         index = random.sample(range(len(self.train_features)), sample_size)

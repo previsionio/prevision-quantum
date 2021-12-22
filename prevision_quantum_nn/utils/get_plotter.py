@@ -9,7 +9,7 @@ def get_plotter(params):
     """Returns a plotter given plotting parameters.
 
     Args:
-        params (dictionnary):parameters of the plotter
+        params (dictionary):parameters of the plotter
 
     Returns:
         plotter: PhaseSpacePlotter

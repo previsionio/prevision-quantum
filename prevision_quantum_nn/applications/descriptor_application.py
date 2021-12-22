@@ -128,10 +128,11 @@ class DescriptorApplication(Application):
         # build application
         self.build()
 
-        if self.model.architecture_type != 'discrete':
+        if self.model.architecture_type != 'qubit' and \
+                self.model.architecture_type != 'discrete':
             raise ValueError("Invalid architecture. "
                              "Descriptors can only be computed with "
-                             "discrete architecture for now")
+                             "(qubit) discrete architecture for now")
 
         # preprocess data
         features = None

@@ -7,8 +7,7 @@ def plot_losses(results, prefix="qnn"):
 
     Args:
         results (Pandas dataframe): dataframe containing the losses
-        prefix (string): part of the name given to the generated
-            plot
+        prefix (string): part of the name given to the generated plot
     """
     if "train_loss" not in results.columns:
         print(Warning("No supervised learning results found in data"))
