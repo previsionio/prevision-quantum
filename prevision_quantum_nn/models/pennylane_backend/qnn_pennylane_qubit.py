@@ -34,6 +34,11 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
         self.neural_network = self.params.get("neural_network", None)
         self.ansatz = self.params.get("ansatz", None)
         self.variables_shape = self.params.get("variables_shape", None)
+        self.variables_init_type = self.params.get("variables_init_type",
+                                                   "default")
+        self.variables_random_state = self.params.get("variables_random_state",
+                                                      0)
+        self.ansatz_builder = None
 
         self.check_encoding()
 
@@ -115,7 +120,23 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
             low, high = self.ansatz_builder.variables_range
             var_shape = self.ansatz_builder.variables_shape
 
-            var_init = np.random.uniform(low=low, high=high, size=var_shape)
+            # ideally, use np.random.RandomState(self.variables_random_state)
+            np.random.seed(self.variables_random_state)
+
+            # todo: move these conditions in ansatz_builder
+            if self.variables_init_type == "default":
+                var_init = np.random.uniform(low=low, high=high, size=var_shape)
+            elif self.variables_init_type == "zeros":
+                var_init = np.zeros(var_shape)
+            else:
+                var = 2 * np.pi * np.random.random(var_shape[:-1])
+                var_init = np.array([[var[i], -var[i]]
+                                     for i in np.ndindex(var.shape)])
+
+                var_init = deepcopy(var_init)
+                var_init.resize(var_shape)
+
+                assert var_init.shape == var_shape
 
             if self.interface == "tf":
                 var_init = tf.Variable(var_init)
