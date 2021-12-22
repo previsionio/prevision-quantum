@@ -1,5 +1,5 @@
 import prevision_quantum_nn as qnn
-import numpy as np
+import pennylane.numpy as np
 
 if __name__ == "__main__":
 
@@ -17,7 +17,8 @@ if __name__ == "__main__":
         "layer_type": "template",
         "layer_name": "basic_circuit_6",
         "num_q": 4,
-        "num_layers": 3,
+        "num_layers": 2,
+        "double_mode": True,
     }
 
     descriptor_params = {

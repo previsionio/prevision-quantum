@@ -31,6 +31,8 @@ if __name__ == "__main__":
                    "basic_circuit_5",
                    "basic_circuit_6"]
 
+    y_test = 0.5 + 0.5 * y_test
+
     accs = []
     exprs = []
     ents = []
@@ -45,7 +47,7 @@ if __name__ == "__main__":
             "num_layers": 2,
             # "use_early_stopper": True,
             # "early_stopper_patience": 20,
-            "early_stopper_epsilon": 0.3,
+            "early_stopper_epsilon": 0.1,
             "max_iterations": 101,
             "prefix": prefix,
         }
@@ -69,14 +71,13 @@ if __name__ == "__main__":
         classification_application.solve(dataset)
 
         y_pred = classification_application.predict(x_test)
-        y_pred = 0.5 + 0.5 * y_pred
 
         acc = 0
         for l_true, l_pred in zip(y_test, y_pred):
             if abs(l_true - l_pred) < 1e-5:
                 acc = acc + 1
-        accuracy = acc / len(y_test)
-        print("accuracy", accuracy)
+        acc = acc / len(y_test)
+        print("accuracy", acc)
 
         # build application
         descriptor_application = qnn.get_application(
@@ -97,12 +98,12 @@ if __name__ == "__main__":
 
     import matplotlib.pyplot as plt
 
-    plt.plot(accs, exprs)
+    plt.scatter(accs, exprs)
     plt.xlabel('accuracy')
     plt.ylabel('expressibility')
     plt.show()
 
-    plt.plot(accs, ents)
+    plt.scatter(accs, ents)
     plt.xlabel('accuracy')
     plt.ylabel('entanglement')
     plt.show()
