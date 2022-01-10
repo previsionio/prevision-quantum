@@ -102,7 +102,8 @@ class DescriptorApplication(Application):
 
         self.descriptor.build_for_model(
             self.model.ansatz_builder.variables_shape,
-            self.model.num_q)
+            self.model.num_q,
+            self.model.backend)
 
         if self.model.num_q > self.max_num_q:
             raise ValueError("Too many qubits required for "

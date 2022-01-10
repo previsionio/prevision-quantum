@@ -92,6 +92,7 @@ class DescriptorComputer:
         self.params = params
         self.descriptor_type = params.get('descriptor_type', "expressibility")
         self.num_q = params.get("num_q", 2)
+        self.backend = None
 
         # variables params
         self.variables_range = params.get("variables_range", [0, 2 * np.pi])
@@ -105,7 +106,7 @@ class DescriptorComputer:
         # expressibility params
         self.n_bins = params.get("n_bins", 75)
 
-    def build_for_model(self, variables_shape, num_q):
+    def build_for_model(self, variables_shape, num_q, backend=None):
         """
         Adapts the attributes to the model parameters
 
@@ -121,6 +122,7 @@ class DescriptorComputer:
                                      size=variables_shape)
 
         self.variables_generator = variables_generator
+        self.backend = backend
 
     def measurement_on_circuit(self, circuit, data):
         entanglement_measures = []
