@@ -22,6 +22,10 @@ parametrised_gates_list = [qml.RX, qml.RY, qml.RZ,
 
 
 def double_broadcast(gate, wires, pattern, parameters=None, *args):
+    """
+    Double each gate in order to implement the identity block strategy
+    (1903.05076). Double only parametrised gates
+    """
     if parameters is None:
         qml.broadcast(gate, wires, pattern, *args)
 
@@ -29,6 +33,8 @@ def double_broadcast(gate, wires, pattern, parameters=None, *args):
         qml.broadcast(double_gate(gate), wires, pattern,
                       [[x] for x in parameters], *args)
     else:
+        # in case of a parametrised gate that is not in the list
+        # todo: should we raise an error instead? a warning?
         qml.broadcast(gate, wires, pattern, [[x] for x in parameters], *args)
 
 
@@ -75,7 +81,7 @@ class AnsatzBuilder:
 
             elif self.layer_type == "template":
                 # todo: check double mode for template layers
-                string_list = ["basic_circuit_"+str(i) for i in range(1,20)]
+                string_list = ["basic_circuit_"+str(i) for i in range(1, 20)]
                 if self.layer_name in string_list:
                     pass
 
@@ -128,6 +134,11 @@ class AnsatzBuilder:
         return layers
 
     def get_layer(self):
+        """
+        Remark: if new templates were to be implemented, note that
+        self.broadcast should be used for trainable parameters.
+        For instance, use qml.broadcast for broadcasting Rot(np.pi/6)
+        """
         n = self.num_q
 
         if self.layer_name == "basic_circuit_1":
@@ -182,7 +193,13 @@ class AnsatzBuilder:
                 for i in range(n - 1, -1, -1):
                     for j in range(n - 1, -1, -1):
                         if i != j:
-                            gate(var[ind], wires=[self.wires[i], self.wires[j]])
+                            if self.double_mode:
+                                _gate = double_gate(gate)
+                            else:
+                                _gate = gate
+                            _gate(var[ind], wires=[self.wires[i],
+                                                   self.wires[j]])
+
                             ind += 1
 
                 self.broadcast(qml.RX, self.wires, "single", var[ind:ind + n])

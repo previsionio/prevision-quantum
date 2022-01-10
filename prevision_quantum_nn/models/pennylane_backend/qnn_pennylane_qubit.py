@@ -37,6 +37,7 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
         self.variables_shape = self.params.get("variables_shape", None)
         self.variables_init_type = self.params.get("variables_init_type",
                                                    "default")
+        self.double_mode = self.params.get("double_mode", False)
         self.variables_random_state = self.params.get("variables_random_state",
                                                       0)
         self.ansatz_builder = None
@@ -48,7 +49,8 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
         self.ansatz_builder = AnsatzBuilder(self.num_q,
                                             self.num_layers,
                                             self.layer_name,
-                                            self.layer_type)
+                                            self.layer_type,
+                                            double_mode=self.double_mode)
         self.ansatz_builder.build(self.ansatz, self.variables_shape)
 
         def neural_network(var, features=None):
@@ -137,7 +139,7 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
                 var_init = deepcopy(var_init)
                 var_init.resize(var_shape)
 
-                assert var_init.shape == var_shape
+                assert tuple(var_init.shape) == tuple(var_shape)
 
             if self.interface == "tf":
                 var_init = tf.Variable(var_init)

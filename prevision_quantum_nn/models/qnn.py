@@ -55,7 +55,7 @@ class QuantumNeuralNetwork:
     def __init__(self, params):
         """
         Args:
-            params (dictionnary):Parameters of the QuantumNeuralNetwork
+            params (dictionary):Parameters of the QuantumNeuralNetwork
                 Required
         """
         self.params = params

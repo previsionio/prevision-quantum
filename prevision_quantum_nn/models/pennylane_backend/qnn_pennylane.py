@@ -158,7 +158,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
 
         Args:
             var (list):weights of the model
-            features (array):obervations to be evalueated by the model
+            features (array):observations to be evaluated by the model
             labels (array):labels associated to features
 
         Returns:
