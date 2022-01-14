@@ -6,38 +6,6 @@ import pennylane as qml
 import pennylane.numpy as np
 
 
-def double_gate(gate):
-    def new_gate(weights, wires):
-        gate(weights[..., 0], wires=wires)
-        gate(weights[..., 1], wires=wires)
-
-    return new_gate
-
-
-# todo: put the parametrised_gates_list somewhere else
-#  maybe automatize it?
-parametrised_gates_list = [qml.RX, qml.RY, qml.RZ,
-                           qml.CRX, qml.CRY, qml.CRZ,
-                           qml.Rot]
-
-
-def double_broadcast(gate, wires, pattern, parameters=None, *args):
-    """
-    Double each gate in order to implement the identity block strategy
-    (1903.05076). Double only parametrised gates
-    """
-    if parameters is None:
-        qml.broadcast(gate, wires, pattern, *args)
-
-    elif gate in parametrised_gates_list:
-        qml.broadcast(double_gate(gate), wires, pattern,
-                      [[x] for x in parameters], *args)
-    else:
-        # in case of a parametrised gate that is not in the list
-        # todo: should we raise an error instead? a warning?
-        qml.broadcast(gate, wires, pattern, [[x] for x in parameters], *args)
-
-
 class AnsatzBuilder:
     """AnsatzBuilder.
 
@@ -64,12 +32,10 @@ class AnsatzBuilder:
         self.variables_range = variables_range
         self.double_mode = double_mode
 
-        self.check_double_mode()
+        self.n_parameters = 0
+        self.broadcast_list = []
 
-        if self.double_mode:
-            self.broadcast = double_broadcast
-        else:
-            self.broadcast = qml.broadcast
+        self.check_double_mode()
 
     def check_double_mode(self):
         if self.double_mode:
@@ -81,7 +47,7 @@ class AnsatzBuilder:
 
             elif self.layer_type == "template":
                 # todo: check double mode for template layers
-                string_list = ["basic_circuit_"+str(i) for i in range(1, 20)]
+                string_list = ["basic_circuit_" + str(i) for i in range(1, 20)]
                 if self.layer_name in string_list:
                     pass
 
@@ -115,8 +81,85 @@ class AnsatzBuilder:
             raise ValueError("Invalid layer_type for ansatz building. "
                              f"Valid layer_types are: custom, template")
 
+    def broadcast(self, gate, wires, pattern, n_parameters=0, parameters=None):
+        broadcast_params = {'gate': gate,
+                            'wires': wires,
+                            'pattern': pattern,
+                            'n_parameters': n_parameters,
+                            'parameters': parameters}
+        if pattern == 'single' and n_parameters not in [0, len(wires)]:
+            raise ValueError('Incorrect number of parameters')
+        if pattern == 'double' and n_parameters not in [0, len(wires)//2]:
+            raise ValueError('Incorrect number of parameters')
+        if pattern == 'double_odd' and \
+                n_parameters not in [0, (len(wires)-1)//2]:
+            raise ValueError('Incorrect number of parameters')
+        if pattern == 'chain' and n_parameters not in [0, len(wires) - 1]:
+            raise ValueError('Incorrect number of parameters')
+        if pattern == 'ring' and n_parameters not in [0, len(wires)]:
+            raise ValueError('Incorrect number of parameters')
+
+        if n_parameters > 0 and parameters is not None:
+            raise ValueError("n_parameters and parameters cannot be defined"
+                             "simultaneously.")
+        self.broadcast_list.append(broadcast_params)
+        self.n_parameters += n_parameters
+
+    def unstack_layer(self):
+        if self.variables_shape:
+            print("Warning, variables_shape overwritten")
+        self.variables_shape = (self.num_layers, self.n_parameters,
+                                1 + self.double_mode)
+
+        def layers(variables):
+            for var in variables:  # each layer
+                self.develop_broadcast_list(var[..., 0])
+
+                if self.double_mode:
+                    self.develop_broadcast_list(var[..., 1],
+                                                double_mode=True)
+
+        return layers
+
+    def develop_broadcast_list(self, var, double_mode=False):
+        if double_mode:
+            var = var[::-1]
+        ind = 0
+        for broadcast_params in self.broadcast_list:
+            gate, wires, pattern, n_var, parameters = \
+                self.get_broadcast_params(**broadcast_params)
+            if n_var > 0:
+                weights = var[ind:ind + n_var]
+            else:
+                weights = parameters
+
+            if double_mode:
+                if pattern in ['single', 'double', 'double_odd']:
+                    if n_var > 0:
+                        weights = weights[::-1]
+                    qml.broadcast(gate, wires, pattern, weights)
+                elif pattern in ['chain']:
+                    qml.broadcast(reverse(gate), wires[::-1], pattern, weights)
+                elif pattern in ['ring', 'pyramid', 'all_to_all']:
+                    print(f"Warning: double_mode not implemented "
+                          f"for pattern '{pattern}'")
+                elif type(pattern) is list:
+                    qml.broadcast(gate, wires, pattern[::-1], weights)
+                else:
+                    print(f"Warning: unrecognized pattern '{pattern}'")
+            else:
+                qml.broadcast(gate, wires, pattern, weights)
+            ind += n_var
+
+    def get_broadcast_params(self, gate, wires, pattern,
+                             n_parameters, parameters):
+        return gate, wires, pattern, n_parameters, parameters
+
     def get_layers(self):
         if self.layer_name == "StronglyEntanglingLayers":
+            if self.double_mode:
+                print("Warning: StronglyEntanglingLayers is unfit "
+                      "for double_mode")
             self.variables_shape = qml.templates.layers. \
                 StronglyEntanglingLayers.shape(self.num_layers, self.num_q)
 
@@ -126,221 +169,154 @@ class AnsatzBuilder:
                     wires=range(self.num_q)
                 )
         else:
-            layer = self.get_layer()
+            self.stack_layer()
+            layers = self.unstack_layer()
 
-            def layers(variables):
-                for var in variables:
-                    layer(var)
         return layers
 
-    def get_layer(self):
-        """
-        Remark: if new templates were to be implemented, note that
-        self.broadcast should be used for trainable parameters.
-        For instance, use qml.broadcast for broadcasting Rot(np.pi/6)
-        """
+    def stack_layer(self):
         n = self.num_q
 
         if self.layer_name == "basic_circuit_1":
-            self.variables_shape = (self.num_layers, self.num_q, 2)
-
-            def layer(var):
-                self.broadcast(qml.RX, self.wires, "single",
-                               parameters=var[:, 0])
-                self.broadcast(qml.RZ, self.wires, "single",
-                               parameters=var[:, 1])
+            def layer():
+                self.broadcast(qml.RX, self.wires, "single", n)
+                self.broadcast(qml.RZ, self.wires, "single", n)
 
         elif self.layer_name == "basic_circuit_2":
-            self.variables_shape = (self.num_layers, self.num_q, 2)
-
-            def layer(var):
-                self.broadcast(qml.RX, self.wires, "single",
-                               parameters=var[:, 0])
-                self.broadcast(qml.RZ, self.wires, "single",
-                               parameters=var[:, 1])
+            def layer():
+                self.broadcast(qml.RX, self.wires, "single", n)
+                self.broadcast(qml.RZ, self.wires, "single", n)
                 self.broadcast(qml.CNOT, self.wires[::-1], "chain")
 
         elif self.layer_name in ["basic_circuit_3", "basic_circuit_4"]:
-            self.variables_shape = (self.num_layers, 3 * self.num_q - 1)
-
             if self.layer_name == "basic_circuit_3":
                 gate = qml.CRZ
             else:
                 gate = qml.CRX
 
-            def layer(var):
-                self.broadcast(qml.RX, self.wires, "single",
-                               parameters=var[:n])
-                self.broadcast(qml.RZ, self.wires, "single",
-                               parameters=var[n:2 * n])
-                self.broadcast(gate, self.wires[::-1], "chain",
-                               parameters=var[2 * n:])
+            def layer():
+                self.broadcast(qml.RX, self.wires, "single", n)
+                self.broadcast(qml.RZ, self.wires, "single", n)
+                self.broadcast(gate, self.wires[::-1], "chain", n-1)
 
         elif self.layer_name in ["basic_circuit_5", "basic_circuit_6"]:
-            self.variables_shape = (self.num_layers, 3 * n + n * n)
-
             if self.layer_name == "basic_circuit_5":
                 gate = qml.CRZ
             else:
                 gate = qml.CRX
 
-            def layer(var):
-                self.broadcast(qml.RX, self.wires, "single",
-                               parameters=var[:n])
-                self.broadcast(qml.RZ, self.wires, "single",
-                               parameters=var[n:2 * n])
-                ind = 2 * n
-                for i in range(n - 1, -1, -1):
-                    for j in range(n - 1, -1, -1):
-                        if i != j:
-                            if self.double_mode:
-                                _gate = double_gate(gate)
-                            else:
-                                _gate = gate
-                            _gate(var[ind], wires=[self.wires[i],
-                                                   self.wires[j]])
+            pattern = [[i, j] for i in range(n - 1, -1, -1)
+                       for j in range(n - 1, -1, -1)
+                       if i != j]
 
-                            ind += 1
-
-                self.broadcast(qml.RX, self.wires, "single", var[ind:ind + n])
-                self.broadcast(qml.RZ, self.wires, "single",
-                               var[ind + n:ind + 2 * n])
+            def layer():
+                self.broadcast(qml.RX, self.wires, "single", n)
+                self.broadcast(qml.RZ, self.wires, "single", n)
+                self.broadcast(gate, self.wires, pattern, len(pattern))
+                self.broadcast(qml.RX, self.wires, "single", n)
+                self.broadcast(qml.RZ, self.wires, "single", n)
 
         elif self.layer_name in ["basic_circuit_7", "basic_circuit_8"]:
-            self.variables_shape = (self.num_layers, 5 * n - 1)
-
             if self.layer_name == "basic_circuit_7":
                 gate = qml.CRZ
             else:
                 gate = qml.CRX
 
-            def layer(var):
-                self.broadcast(qml.RX, self.wires, "single", var[:n])
-                self.broadcast(qml.RZ, self.wires, "single", var[n:2 * n])
-                ind = 2 * n
-                self.broadcast(gate, self.wires[::-1], "double",
-                               var[ind: ind + n // 2])
-                ind += n // 2
-                self.broadcast(qml.RX, self.wires, "single", var[ind:ind + n])
-                self.broadcast(qml.RZ, self.wires, "single",
-                               var[ind + n:ind + 2 * n])
-                ind += 2 * n
-                self.broadcast(gate, self.wires[::-1], "double_odd",
-                               var[ind: ind + (n - 1) // 2])
+            def layer():
+                self.broadcast(qml.RX, self.wires, "single", n)
+                self.broadcast(qml.RZ, self.wires, "single", n)
+                self.broadcast(gate, self.wires[::-1], "double", n // 2)
+                self.broadcast(qml.RX, self.wires, "single", n)
+                self.broadcast(qml.RZ, self.wires, "single", n)
+                self.broadcast(gate, self.wires[::-1], "double_odd", (n - 1)//2)
 
         elif self.layer_name == "basic_circuit_9":
-            self.variables_shape = (self.num_layers, n)
-
-            def layer(var):
+            def layer():
                 self.broadcast(qml.Hadamard, self.wires, "single")
                 self.broadcast(qml.CZ, self.wires[::-1], "chain")
-                self.broadcast(qml.RX, self.wires, "single", var)
+                self.broadcast(qml.RX, self.wires, "single", n)
 
         elif self.layer_name == "basic_circuit_10":
-            self.variables_shape = (self.num_layers, 2 * n)
 
-            def layer(var):
-                self.broadcast(qml.RY, self.wires, "single", var[:n])
-                self.broadcast(qml.CZ, self.wires[::-1], "ring")
-                self.broadcast(qml.RY, self.wires, "single", var[n:])
+            def layer():
+                qml.broadcast(qml.RY, self.wires, "single", n)
+                qml.broadcast(qml.CZ, self.wires[::-1], "ring")
+                qml.broadcast(qml.RY, self.wires, "single", n)
 
         elif self.layer_name in ["basic_circuit_11", "basic_circuit_12"]:
-            self.variables_shape = (self.num_layers, 4 * n - 4)
-
             if self.layer_name == "basic_circuit_11":
                 gate = qml.CNOT
             else:
                 gate = qml.CZ
 
-            def layer(var):
-                ind = n
-                self.broadcast(qml.RY, self.wires, "single", var[:ind])
-                self.broadcast(qml.RZ, self.wires, "single", var[ind: ind + n])
-                ind += n
-                self.broadcast(reverse(gate), self.wires, "double")
-                self.broadcast(qml.RY, self.wires[1:-1], "single",
-                               var[ind:ind + n - 2])
-                ind += n - 2
-                self.broadcast(qml.RZ, self.wires[1:-1], "single",
-                               var[ind:ind + n - 2])
-                ind += n - 2
-                self.broadcast(reverse(gate), self.wires, "double_odd")
+            def layer():
+                qml.broadcast(qml.RY, self.wires, "single", n)
+                qml.broadcast(qml.RZ, self.wires, "single", n)
+                qml.broadcast(reverse(gate), self.wires, "double")
+                qml.broadcast(qml.RY, self.wires[1:-1], "single", n - 2)
+                qml.broadcast(qml.RZ, self.wires[1:-1], "single", n - 2)
+                qml.broadcast(reverse(gate), self.wires, "double_odd")
 
         elif self.layer_name in ["basic_circuit_13", "basic_circuit_14"]:
             # Warning: the implementation might not be correct in the paper
             # TODO: write the original implementation from paper
             #                https://arxiv.org/pdf/1804.00633.pdf
-            self.variables_shape = (self.num_layers, 4 * n)
             if self.layer_name == "basic_circuit_13":
                 gate = qml.CRZ
             else:
                 gate = qml.CRX
 
-            def layer(var):
-                n = len(self.wires)
-                pattern1 = [[i % n, (i + 1) % n] for i in range(n - 1, -1, -1)]
-                pattern2 = [[i % n, (i - 1) % n] for i in range(-1, n - 1)]
+            pattern1 = [[i % n, (i + 1) % n] for i in range(n - 1, -1, -1)]
+            pattern2 = [[i % n, (i - 1) % n] for i in range(-1, n - 1)]
 
-                ind = 0
-                self.broadcast(qml.RY, self.wires, "single", var[ind:ind + n])
-                ind += n
-                self.broadcast(gate, self.wires, pattern1, var[ind: ind + n])
-                ind += n
-                self.broadcast(qml.RY, self.wires, "single", var[ind:ind + n])
-                ind += n
-                self.broadcast(gate, self.wires, pattern2, var[ind:ind + n])
+            def layer():
+                self.broadcast(qml.RY, self.wires, "single", n)
+                self.broadcast(gate, self.wires, pattern1, n)
+                self.broadcast(qml.RY, self.wires, "single", n)
+                self.broadcast(gate, self.wires, pattern2, n)
 
         elif self.layer_name == "basic_circuit_15":
-            self.variables_shape = (self.num_layers, 2 * n)
 
-            def layer(var):
-                pattern1 = [[i % n, (i + 1) % n] for i in range(n - 1, -1, -1)]
-                pattern2 = [[i % n, (i - 1) % n] for i in range(-1, n - 1)]
+            pattern1 = [[i % n, (i + 1) % n] for i in range(n - 1, -1, -1)]
+            pattern2 = [[i % n, (i - 1) % n] for i in range(-1, n - 1)]
 
-                self.broadcast(qml.RY, self.wires, "single", var[:n])
+            def layer():
+                self.broadcast(qml.RY, self.wires, "single", n)
                 self.broadcast(qml.CNOT, self.wires, pattern1)
-                self.broadcast(qml.RY, self.wires, "single", var[n:])
+                self.broadcast(qml.RY, self.wires, "single", n)
                 self.broadcast(qml.CNOT, self.wires, pattern2)
 
         elif self.layer_name in ["basic_circuit_16", "basic_circuit_17"]:
-            self.variables_shape = (self.num_layers, 3 * n - 1)
             if self.layer_name == "basic_circuit_16":
                 gate = qml.CRZ
             else:
                 gate = qml.CRX
 
-            def layer(var):
-                self.broadcast(qml.RX, self.wires, "single", var[:n])
-                self.broadcast(qml.RZ, self.wires, "single", var[n:2 * n])
-                ind = 2 * n
-                self.broadcast(reverse(gate), self.wires, "double",
-                               var[ind: ind + n // 2])
-                ind += n // 2
+            def layer():
+                self.broadcast(qml.RX, self.wires, "single", n)
+                self.broadcast(qml.RZ, self.wires, "single", n)
+                self.broadcast(reverse(gate), self.wires, "double", n // 2)
                 self.broadcast(reverse(gate), self.wires, "double_odd",
-                               var[ind: ind + (n - 1) // 2])
+                               (n - 1)//2)
 
         elif self.layer_name in ["basic_circuit_18", "basic_circuit_19"]:
-            self.variables_shape = (self.num_layers, 3 * n)
             if self.layer_name == "basic_circuit_18":
                 gate = qml.CRZ
             else:
                 gate = qml.CRX
 
-            def layer(var):
-                pattern = [[i % n, (i + 1) % n] for i in range(n - 1, -1, -1)]
+            pattern = [[i % n, (i + 1) % n] for i in range(n - 1, -1, -1)]
 
-                self.broadcast(qml.RX, self.wires, "single", var[:n])
-                self.broadcast(qml.RZ, self.wires, "single", var[n:2 * n])
-                self.broadcast(gate, self.wires, pattern, var[2 * n:])
+            def layer():
+                self.broadcast(qml.RX, self.wires, "single", n)
+                self.broadcast(qml.RZ, self.wires, "single", n)
+                self.broadcast(gate, self.wires, pattern, n)
 
         else:
             raise ValueError(f"No ansatz corresponding to layer name: "
                              f"{self.layer_name}")
 
-        if self.double_mode:
-            self.variables_shape = [*self.variables_shape, 2]
-
-        return layer
+        layer()
 
 
 def reverse(gate):
