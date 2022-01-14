@@ -25,8 +25,9 @@ def twospirals(turns, noise=0.7, random_state=0):
 
 def main_function(variables_init_type, prefix, nb_turns, double_mode):
     # prepare data
-    prefix = "results/"+prefix + "_num_q_2"
-    random_state = 0
+    circuit = "basic_circuit_5"
+    prefix = f"results/circuit{circuit.split('_')[-1]}_{prefix}_num_q_2"
+    random_state = 3+1
 
     X, y = twospirals(nb_turns)
     """
@@ -46,64 +47,22 @@ def main_function(variables_init_type, prefix, nb_turns, double_mode):
     dataset = qnn.get_dataset_from_numpy(x_train, y_train,
                                          val_features=x_val, val_labels=y_val)
 
-    # customize preprocessing
-    preprocessing_params = {
-        "polynomial_degree": 1
-    }
-
     # customize model
     num_q = 2
     num_layers = 2
-    n = num_q
-
-    if double_mode:
-        variables_shape = (num_layers, 3 * n - 1, 2)
-    else:
-        variables_shape = (num_layers, 3 * n - 1)
-
-    if double_mode:
-        def ansatz(variables):
-            wires = range(num_q)
-
-            for var in variables:
-                qml.broadcast(qml.RX, wires, "single", var[:n, 0])
-                qml.broadcast(qml.RX, wires, "single", var[:n, 1])
-
-                qml.broadcast(qml.RZ, wires, "single", var[n:2 * n, 0])
-                qml.broadcast(qml.RZ, wires, "single", var[n:2 * n, 1])
-                ind = 2 * n
-                qml.broadcast(qml.CRZ, wires, "double",
-                              var[ind: ind + n // 2, 0])
-                qml.broadcast(qml.CRZ, wires, "double",
-                              var[ind: ind + n // 2, 1])
-                ind += n // 2
-                qml.broadcast(qml.CNOT, wires, "double_odd")
-
-    else:
-        def ansatz(variables):
-            wires = range(num_q)
-
-            for var in variables:
-                qml.broadcast(qml.RX, wires, "single", var[:n])
-                qml.broadcast(qml.RZ, wires, "single", var[n:2 * n])
-                ind = 2 * n
-                qml.broadcast(qml.CRZ, wires, "double",
-                              var[ind: ind + n // 2])
-                ind += n // 2
-                qml.broadcast(qml.CNOT, wires, "double_odd")
 
     model_params = {
         "architecture": "qubit",
         "backend": "lightning.qubit",
         "num_q": num_q,
         "num_layers": num_layers,
-        "layer_type": "custom",
-        "ansatz": ansatz,
-        "variables_shape": variables_shape,
+        "layer_name": circuit,
         "variables_init_type": variables_init_type,
+        "double_mode": double_mode,
         "variables_random_state": random_state,
         #"early_stopper_epsilon": 1e-4,
         "max_iterations": 300,
+        "early_stopper_patience": 50,
     }
 
     # build application
@@ -148,6 +107,7 @@ def main_function(variables_init_type, prefix, nb_turns, double_mode):
         file.write(f"auc = {auc},  accuracy = {accuracy}\n")
         file.write("\n")
 
+
 if __name__ == "__main__":
 
     nb_turns = float(sys.argv[1])
@@ -157,3 +117,20 @@ if __name__ == "__main__":
     plt.scatter(X[y == -1][:, 0], X[y == -1][:, 1])
     plt.show()
 
+"""
+ARCHIVE STRING
+custom circuit used for first results 'custom'
+
+def ansatz(variables):
+    wires = range(num_q)
+
+    for var in variables:
+        qml.broadcast(qml.RX, wires, "single", var[:n])
+        qml.broadcast(qml.RZ, wires, "single", var[n:2 * n])
+        ind = 2 * n
+        qml.broadcast(qml.CRZ, wires, "double",
+                      var[ind: ind + n // 2])
+        ind += n // 2
+        qml.broadcast(qml.CNOT, wires, "double_odd")
+
+"""
