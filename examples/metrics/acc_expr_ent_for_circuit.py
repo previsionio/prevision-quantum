@@ -24,7 +24,7 @@ if __name__ == "__main__":
     dataset = qnn.get_dataset_from_numpy(x_train, y_train,
                                          val_features=x_val, val_labels=y_val)
 
-    prefix = "acc_expr_ent_6"
+    prefix = "results/acc_expr_ent_6"
     # customize model
     model_params = {
         "layer_name": "basic_circuit_6",

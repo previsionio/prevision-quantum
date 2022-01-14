@@ -13,6 +13,7 @@ if __name__ == "__main__":
     # customize model
     model_params = {
         "architecture": "qubit",
+        "backend": "lightning.qubit",
         "encoding": "no_encoding",
         "layer_type": "template",
         "layer_name": "basic_circuit_6",
@@ -25,7 +26,7 @@ if __name__ == "__main__":
         # "variables_sample_size": 100,
     }
 
-    prefix = f"ct{model_params['layer_name'].split('_')[-1]}-" \
+    prefix = f"results/ct{model_params['layer_name'].split('_')[-1]}-" \
              f"nq{model_params['num_q']}-nl{model_params['num_layers']}"
 
     # build application

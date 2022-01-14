@@ -39,7 +39,7 @@ if __name__ == "__main__":
     for layer_name in layer_names:
 
         print(layer_name)
-        prefix = "corr_expr_acc" + layer_name[-1]
+        prefix = "results/corr_expr_acc" + layer_name[-1]
         # customize model
         model_params = {
             "layer_name": layer_name,
