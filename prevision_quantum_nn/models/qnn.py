@@ -18,7 +18,7 @@ class QuantumNeuralNetwork:
         params (dictionary):contains the parameters of the model
         use_early_stopper (bool):if True, early stopping will be activated,
             default: True
-        early_stopper (EarlyStopper):early stopper that stops the run when
+        _early_stopper (EarlyStopper):early stopper that stops the run when
             the validation loss increases
         early_stopper_patience (int):number of iterations during which the
             early stopper module will save the weights and restore them
@@ -62,12 +62,28 @@ class QuantumNeuralNetwork:
 
         self.architecture_type = None
         self.params_file = None
-        self.early_stopper = None
+        self._early_stopper = None
         self.postprocessor = None
         self.built = False
         self.logger = logging.getLogger('model')
         self.iteration = 0
         self.val_verbose_period = 1
+
+        self.running_mode = None
+        self.architecture = None
+        self.num_q = None
+        self.num_categories = None
+        self.num_actions = None
+        self.max_iterations = None
+        self.num_layers = None
+        self.snapshot_frequency = None
+        self.type_problem = None
+        self.batch_size = None
+        self.val_verbose_period = None
+        self.use_early_stopper = None
+        self.early_stopper_patience = None
+        self.early_stopper_epsilon = None
+        self.prefix = None
 
     def build(self):
         """ build the model: initializes the weights """
@@ -157,8 +173,8 @@ class QuantumNeuralNetwork:
                 self.early_stopper_patience < 1:
             raise ValueError("early_stopper_patience must be "
                              "a positive integer")
-        self.early_stopper = EarlyStopper(window=self.early_stopper_patience,
-                                          epsilon=self.early_stopper_epsilon)
+        self._early_stopper = EarlyStopper(window=self.early_stopper_patience,
+                                           epsilon=self.early_stopper_epsilon)
 
     def get_random_batch(self, features, labels, batch_size):
         """Get random batch.
@@ -219,3 +235,18 @@ class QuantumNeuralNetwork:
         else:
             self.logger.info(f"iter: {self.iteration} "
                              f"train_loss: {train_loss:.3e}")
+
+    def check_params(self):
+        """
+        This first implementation requires that we respect the underscore
+        naming convention.
+        Another implementation would be to write every 'correct arguments' in
+        a list. They are the attributes xxx defined as:
+            self.xxx = self.params.get('xxx', 'yyy')
+        """
+        for key in self.params.keys():
+            if key not in self.__dict__:
+                print(f"Incorrect key '{key}'")
+                for self_key in self.__dict__:
+                    if self_key.find(key) >= 0 and self_key[0] != "_":
+                        print(f"    You can try '{self_key}'")

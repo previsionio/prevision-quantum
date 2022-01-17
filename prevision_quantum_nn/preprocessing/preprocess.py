@@ -341,3 +341,18 @@ class Preprocessor:
             padding = self.padding_parameter*np.ones((obs_shape, padding_dim))
             features = np.hstack([features, padding])
         return features
+
+    def check_params(self):
+        """
+        This first implementation requires that we respect the underscore
+        naming convention.
+        Another implementation would be to write every 'correct arguments' in
+        a list. They are the attributes xxx defined as:
+            self.xxx = self.params.get('xxx', 'yyy')
+        """
+        for key in self.params.keys():
+            if key not in self.__dict__:
+                print(f"Incorrect key '{key}'")
+                for self_key in self.__dict__:
+                    if self_key.find(key) >= 0 and self_key[0] != "_":
+                        print(f"    You can try '{self_key}'")

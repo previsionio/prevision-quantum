@@ -97,3 +97,15 @@ class Application:
         self.logger.info("\n"+json.dumps(self.postprocessor.params,
                                          indent=4,
                                          sort_keys=True))
+
+    def check_params(self):
+        if self.model:
+            print("-- Check model params --")
+            self.model.check_params()
+        if self.preprocessor:
+            print("-- Check preprocessor params --")
+            self.preprocessor.check_params()
+        if self.postprocessor:
+            print("-- Check postprocessor params --")
+            self.postprocessor.check_params()
+

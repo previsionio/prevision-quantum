@@ -22,7 +22,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
 
     Attributes:
         params (dict):dictionary containing the main parameters of the model
-        optimizer (Optimizer):Optimizer of the quantum circuit.
+        _optimizer (Optimizer):Optimizer of the quantum circuit.
             Can be AdamOptimizer or NesterovMomentumOptimizer
         batch_size (int):size of the batch with which the training
             should be perfomed
@@ -61,7 +61,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
         self.interface = self.params.get("interface", "autograd")
         self.layer_type = self.params.get("layer_type", "template")
         self.encoding = self.params.get("encoding", None)
-        self.optimizer = None
+        self._optimizer = None
         self.var = None
         self.dev = None
         self.neural_network = lambda *_, **__: None
@@ -91,30 +91,30 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
         # autograd interface
         if self.interface == "autograd":
             if self.optimizer_name == "SGD":
-                self.optimizer = \
+                self._optimizer = \
                     qml.optimize.GradientDescentOptimizer(self.learning_rate)
             elif self.optimizer_name == "Adagrad":
-                self.optimizer = \
+                self._optimizer = \
                     qml.optimize.AdagradOptimizer(self.learning_rate)
             elif self.optimizer_name == "Adam":
-                self.optimizer = \
+                self._optimizer = \
                     qml.optimize.AdamOptimizer(self.learning_rate)
             elif self.optimizer_name == "RMSProp":
-                self.optimizer = \
+                self._optimizer = \
                     qml.optimize.RMSPropOptimizer(self.learning_rate)
         # interface
         elif self.interface == "tf":
             if self.optimizer_name == "SGD":
-                self.optimizer = tf.keras.optimizers.SGD(
+                self._optimizer = tf.keras.optimizers.SGD(
                     learning_rate=self.learning_rate)
             elif self.optimizer_name == "Adagrad":
-                self.optimizer = tf.keras.optimizers.Adagrad(
+                self._optimizer = tf.keras.optimizers.Adagrad(
                     learning_rate=self.learning_rate)
             elif self.optimizer_name == "Adam":
-                self.optimizer = tf.keras.optimizers.Adam(
+                self._optimizer = tf.keras.optimizers.Adam(
                     learning_rate=self.learning_rate)
             elif self.optimizer_name == "RMSProp":
-                self.optimizer = tf.keras.optimizers.RMSProp(
+                self._optimizer = tf.keras.optimizers.RMSProp(
                     learning_rate=self.learning_rate)
 
     def snapshot(self, is_best=False):
@@ -206,7 +206,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
             var (array):weights of the model
         """
         if self.interface == "autograd":
-            var = self.optimizer.step(lambda v:
+            var = self._optimizer.step(lambda v:
                                       self.cost(v, features, labels), var)
         elif self.interface == "tf":
             with tf.GradientTape() as tape:
@@ -217,10 +217,10 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
                 # in qubit, we got tf.Variables, which are not iterable
                 if isinstance(var, tf.Variable):
                     gradients = tape.gradient(loss, [var])
-                    self.optimizer.apply_gradients(zip(gradients, [var]))
+                    self._optimizer.apply_gradients(zip(gradients, [var]))
                 else:
                     gradients = tape.gradient(loss, var)
-                    self.optimizer.apply_gradients(zip(gradients, var))
+                    self._optimizer.apply_gradients(zip(gradients, var))
         return var
 
     def fit(self,
@@ -278,10 +278,10 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
                 val_loss = np.asscalar(np.array(self.cost(var,
                                                           val_features,
                                                           val_labels)))
-                if self.early_stopper and \
+                if self._early_stopper and \
                         self.iteration > 2 * self.early_stopper_patience:
                     stopping_criterion = \
-                        self.early_stopper.update(val_loss, var)
+                        self._early_stopper.update(val_loss, var)
 
             # dump output
             if verbose:
@@ -305,7 +305,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
                 plotter_callback(self)
 
             if stopping_criterion:
-                var = self.early_stopper.get_best_var()
+                var = self._early_stopper.get_best_var()
                 best_iter = self.iteration - self.early_stopper_patience
                 self.logger.info("early stopper stopped - "
                                  "restoring best weights. "
