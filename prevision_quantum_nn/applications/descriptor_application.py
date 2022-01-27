@@ -8,7 +8,7 @@ from prevision_quantum_nn.applications.metrics.descriptor_computer import \
 from prevision_quantum_nn.preprocessing.preprocess import Preprocessor
 from prevision_quantum_nn.postprocessing.postprocess import Postprocessor
 from prevision_quantum_nn.utils.get_model import get_model
-import warnings
+
 
 class DescriptorApplication(Application):
     """Classification Application.

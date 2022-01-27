@@ -69,6 +69,41 @@ class QuantumNeuralNetwork:
         self.iteration = 0
         self.val_verbose_period = 1
 
+        self.running_mode = None
+        self.architecture = None
+        self.num_q = None
+        self.num_categories = None
+        self.num_actions = None
+        self.max_iterations = None
+        self.num_layers = None
+        self.snapshot_frequency = None
+        self.type_problem = None
+        self.batch_size = None
+        self.val_verbose_period = None
+        self.use_early_stopper = None
+        self.early_stopper_patience = None
+        self.early_stopper_epsilon = None
+        self.prefix = None
+
+    @staticmethod
+    def get_params_attributes():
+        """Attributes that can be set as a parameter"""
+        return ["running_mode",
+                "architecture",
+                "num_q",
+                "num_categories",
+                "num_actions",
+                "max_iterations",
+                "num_layers",
+                "snapshot_frequency",
+                "type_problem",
+                "batch_size",
+                "val_verbose_period",
+                "use_early_stopper",
+                "early_stopper_patience",
+                "early_stopper_epsilon",
+                "prefix"]
+
     def build(self):
         """ build the model: initializes the weights """
 

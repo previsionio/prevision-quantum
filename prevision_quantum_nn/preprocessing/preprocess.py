@@ -80,7 +80,18 @@ class Preprocessor:
 
         self.check_preprocessor()
         self.logger = logging.getLogger("preprocessing")
-               
+
+    @classmethod
+    def get_params_attributes(cls):
+        """Attributes that can be set as a parameter"""
+        return ["verbose",
+                "polynomial_degree",
+                "polynomial_expansion_type",
+                "feature_engineering",
+                "force_dimension_reduction",
+                "dimension_reduction_fitter",
+                "padding_parameter"]
+
     def __getstate__(self):
         d = dict(self.__dict__)
         del d['logger']

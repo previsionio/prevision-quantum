@@ -67,6 +67,18 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
         self.neural_network = lambda *_, **__: None
         self.backend = None
 
+    @staticmethod
+    def get_params_attributes():
+        """Attributes that can be set as a parameter"""
+        cls = PennylaneNeuralNetwork
+        return super(cls, cls).get_params_attributes() + \
+               ["learning_rate",
+                "val_verbose_period",
+                "optimizer_name",
+                "interface",
+                "layer_type",
+                "encoding"]
+
     def initialize_weights(self, weights_file=None):
         """ initialize weights
 

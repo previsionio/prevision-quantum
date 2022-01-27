@@ -174,3 +174,10 @@ class ReinforcementLearningApplication(Application):
         else:
             preprocessed_state = np.array([state])
         return preprocessed_state
+
+    @classmethod
+    def check_params(cls, preprocessing_params,
+                     model_params,
+                     postprocessing_params):
+        # todo: Implement "check_params" for Reinforcement Learning
+        return
