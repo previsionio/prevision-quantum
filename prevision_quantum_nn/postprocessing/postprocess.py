@@ -19,6 +19,11 @@ class Postprocessor:
         self.plotter = None
         self.logger = logging.getLogger('postprocessing')
 
+    @classmethod
+    def get_params_attributes(cls):
+        """Attributes that can be set as a parameter"""
+        return ["phase_space_plotter"]
+
     def build(self, preprocessor):
         """Builds the postprocessor using preprocessor.
 
@@ -26,6 +31,7 @@ class Postprocessor:
             preprocessor (Preprocessor):preprocessor identical to
                 the one used to build the model
         """
+        # todo: add a check_params function for plotting_params
         plotting_params = self.params.get("phase_space_plotter")
         if plotting_params:
             self.plotter = get_plotter(plotting_params)

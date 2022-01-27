@@ -48,39 +48,67 @@ def get_application(application_type,
     application = None
 
     if application_type == "classification":
+        ClassificationApplication.check_params(
+            preprocessing_params,
+            model_params,
+            postprocessing_params)
         application = ClassificationApplication(
             prefix,
             preprocessing_params,
             model_params,
             postprocessing_params)
+
     elif application_type == "multiclassification":
+        MultiClassificationApplication.check_params(
+            preprocessing_params,
+            model_params,
+            postprocessing_params)
         application = MultiClassificationApplication(
             prefix,
             preprocessing_params,
             model_params,
             postprocessing_params)
+
     elif application_type == "regression":
+        RegressionApplication.check_params(
+            preprocessing_params,
+            model_params,
+            postprocessing_params)
         application = RegressionApplication(
             prefix,
             preprocessing_params,
             model_params,
             postprocessing_params)
+
     elif application_type == "reinforcement_learning":
+        ReinforcementLearningApplication.check_params(
+            preprocessing_params,
+            model_params,
+            postprocessing_params)
         application = ReinforcementLearningApplication(
             prefix,
             preprocessing_params,
             model_params,
             postprocessing_params,
             rl_learner_type=rl_learner_type)
+
     elif application_type == "descriptor_computation":
+        DescriptorApplication.check_params(
+            preprocessing_params,
+            model_params,
+            postprocessing_params)
         application = DescriptorApplication(
             prefix,
             preprocessing_params,
             model_params,
             postprocessing_params,
             descriptor_params=descriptor_params)
+
     else:
-        raise ValueError(f"No such type of application {application_type}")
+        raise ValueError(f"No such type of application {application_type}.\n"
+                         f"Try classification, multiclassification, "
+                         f"regression, reinforcement_learning "
+                         f"or descriptor_computation")
 
     return application
 

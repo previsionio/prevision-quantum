@@ -9,7 +9,7 @@ import math
 from prevision_quantum_nn.models.pennylane_backend.pennylane_ansatz import \
     AnsatzBuilder
 from prevision_quantum_nn.models.pennylane_backend.qnn_pennylane \
-        import PennylaneNeuralNetwork
+    import PennylaneNeuralNetwork
 
 
 class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
@@ -20,6 +20,7 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
     Attributes:
         dev (qml.device):device to be used to train the model
     """
+
     def __init__(self, params):
         """Constructor.
 
@@ -43,6 +44,21 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
         self.ansatz_builder = None
 
         self.check_encoding()
+
+    @staticmethod
+    def get_params_attributes():
+        """Attributes that can be set as a parameter"""
+        cls = PennylaneQubitNeuralNetwork
+        return super(cls, cls).get_params_attributes() + \
+               ["encoding",
+                "backend",
+                "layer_name",
+                "neural_network",
+                "ansatz",
+                "variables_shape",
+                "variables_init_type",
+                "double_mode",
+                "variables_random_state"]
 
     def build_model(self):
         """ builds the device and the qnode"""
