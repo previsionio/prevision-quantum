@@ -142,7 +142,7 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
             # ideally, use np.random.RandomState(self.variables_random_state)
             np.random.seed(self.variables_random_state)
 
-            # todo: move these conditions in ansatz_builder
+            # todo: should these conditions be moved to ansatz_builder?
             if self.variables_init_type == "default":
                 var_init = np.random.uniform(low=low, high=high, size=var_shape)
             elif self.variables_init_type == "zeros":

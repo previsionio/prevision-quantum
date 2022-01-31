@@ -195,11 +195,14 @@ class QuantumNeuralNetwork:
         self.early_stopper = EarlyStopper(window=self.early_stopper_patience,
                                           epsilon=self.early_stopper_epsilon)
 
-    def get_random_batch(self, features, labels, batch_size):
+    @staticmethod
+    def get_random_batch(features, labels, batch_size):
         """Get random batch.
+
         Args:
             features (numpy array):features to be randomly selected
             labels (numpy array):labels to be randomly selected
+            batch_size (int):batch size
 
         Returns:
             features: numpy array
@@ -254,3 +257,9 @@ class QuantumNeuralNetwork:
         else:
             self.logger.info(f"iter: {self.iteration} "
                              f"train_loss: {train_loss:.3e}")
+
+    def predict_proba(self, features):
+        raise NotImplementedError("Implement this method in daughter class.")
+
+    def predict(self, features):
+        raise NotImplementedError("Implement this method in daughter class.")

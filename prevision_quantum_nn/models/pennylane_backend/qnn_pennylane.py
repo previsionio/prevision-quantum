@@ -25,7 +25,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
         optimizer (Optimizer):Optimizer of the quantum circuit.
             Can be AdamOptimizer or NesterovMomentumOptimizer
         batch_size (int):size of the batch with which the training
-            should be perfomed
+            should be performed
         verbose (bool):sets the verbosity to on if True and off if False
         interface (str):interface of the pennylane backend. Can be tf
             or autograd
@@ -247,6 +247,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
         Args:
             train_features (array):training features
             train_labels (array):training labels
+            plotter_callback (lambda model: None): plot function caller
             val_features (array):validation features
             val_labels (array):validation labels
             verbose (bool):if True, verbosity will be activated
@@ -272,8 +273,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
         while not stopping_criterion and self.iteration < self.max_iterations:
 
             if self.batch_size > 1:
-                x_train, y_train = self.get_random_batch(train_features,
-                                                         train_labels,
+                x_train, y_train = self.get_random_batch(train_labels,
                                                          self.batch_size)
             else:
                 x_train = train_features
@@ -337,7 +337,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
             self.logger.info(f"elapsed time (s): {elapsed_time:.3e}")
 
     def predict(self, features):
-        """Predicts certain obervations.
+        """Predicts certain observations.
 
         Args:
             features (array):observations to be predicted
@@ -363,7 +363,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
            array of features
 
         Args:
-            features (array):features to be predicted
+            features (array):features used for prediction
 
         Returns:
             preds: float or int
