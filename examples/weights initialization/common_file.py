@@ -1,8 +1,8 @@
+from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 import numpy as np
 
 import prevision_quantum_nn as qnn
-import pennylane as qml
 import matplotlib.pyplot as plt
 import time
 from sklearn import datasets
@@ -23,20 +23,37 @@ def twospirals(turns, noise=0.7, random_state=0):
     return x, y
 
 
-def main_function(variables_init_type, prefix, nb_turns, double_mode):
+def main_function(variables_init_type, prefix, double_mode):
     # prepare data
-    circuit = "basic_circuit_5"
-    prefix = f"results/circuit{circuit.split('_')[-1]}_{prefix}_num_q_2"
+    num_q = 4
+    num_layers = 2
+    circuit = "basic_circuit_6"
+    dataset_name = "breast_cancer"
+
+    if dataset_name == "spirals":
+        nb_turns = float(sys.argv[1])
+        prefix += f"_nb_turns_{nb_turns}"
+
+    prefix = f"results/circuit{circuit.split('_')[-1]}_dataset_{dataset_name}" \
+             f"_{prefix}_num_q_{num_q}"
     random_state = 3+1
 
-    X, y = twospirals(nb_turns)
-    """
-    num_samples = 500
-    X, y = datasets.make_moons(n_samples=num_samples,
-                               noise=0.05, random_state=0)
-    # shift label from {0, 1} to {-1, 1}
-    y = y * 2 - np.ones(len(y))
-    """
+    if dataset_name == "spirals":
+        nb_turns = float(sys.argv[1])
+        X, y = twospirals(nb_turns)
+    elif dataset_name == "breast_cancer":
+        X, y = datasets.load_breast_cancer(return_X_y=True)
+        pca = PCA(n_components=num_q)
+        X = pca.fit_transform(X=X)
+        y = 2 * y - 1
+    elif dataset_name == "moon":
+        num_samples = 500
+        X, y = datasets.make_moons(n_samples=num_samples,
+                                   noise=0.05, random_state=0)
+        # shift label from {0, 1} to {-1, 1}
+        y = y * 2 - np.ones(len(y))
+    else:
+        raise ValueError("incorrect dataset_name")
 
     x_temp, x_test, y_temp, y_test = train_test_split(X, y, test_size=0.25,
                                                       random_state=42)
@@ -47,9 +64,9 @@ def main_function(variables_init_type, prefix, nb_turns, double_mode):
     dataset = qnn.get_dataset_from_numpy(x_train, y_train,
                                          val_features=x_val, val_labels=y_val)
 
-    # customize model
-    num_q = 2
-    num_layers = 2
+    preprocessing_params = {
+        # "polynomial_degree": 2
+    }
 
     model_params = {
         "architecture": "qubit",
@@ -69,6 +86,7 @@ def main_function(variables_init_type, prefix, nb_turns, double_mode):
     application = qnn.get_application(
         "classification",
         prefix=prefix,
+        preprocessing_params=preprocessing_params,
         model_params=model_params)
 
     # solve application

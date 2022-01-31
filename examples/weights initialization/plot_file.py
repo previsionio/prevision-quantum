@@ -40,9 +40,9 @@ if __name__ == "__main__":
     prefix_list = ["id_blk",
                    "random_init_single",
                    "random_init_double",
-    #               ]
-    #zeros = [
-        "zero_init_single",
+                   #               ]
+                   # zeros = [
+                   "zero_init_single",
                    "zero_init_double",
                    ]
     linestyles = ["solid",
@@ -52,7 +52,7 @@ if __name__ == "__main__":
                   "dotted",
                   ]
 
-    num_q = 2    
+    num_q = 5
 
     if len(sys.argv) > 1:
         try:
@@ -72,17 +72,20 @@ if __name__ == "__main__":
         circuit_prefix = nb_circuit  # "custom", "circuit5"
 
     type_metric = sys.argv[3] if len(sys.argv) > 3 else "auc"
-    
+
     num_q = sys.argv[4] if len(sys.argv) > 4 else num_q
-    str_num_q = f"_num_q_{num_q}" # if num_q != 5 else ""
-    
+    str_num_q = f"_num_q_{num_q}"  # if num_q != 5 else ""
+
+    dataset_name = sys.argv[5] if len(sys.argv) > 5 else ""
+    str_dataset = f"_dataset_{dataset_name}" if dataset_name else ""
+
     ncols = len(nb_turns_list)
     nrows = 1
     figsize = (16, 9)
 
     if type_metric == "all":
         nrows = 3
-        figsize = (5*ncols, 10)
+        figsize = (5 * ncols, 10)
 
     dpi = 300
     fig, axes = plt.subplots(ncols=ncols, nrows=nrows,
@@ -95,13 +98,12 @@ if __name__ == "__main__":
         metrics = [type_metric]
 
     if len(axes.shape) == 1:
-        axes.resize((len(axes),1))
+        axes.resize((len(axes), 1))
     print(axes.shape)
     try:
-        axes[0,0]
+        axes[0, 0]
     except:
         axes = {(0, 0): axes, 0: axes}
-
 
     for j, nb_turns in enumerate(nb_turns_list):
 
@@ -109,16 +111,20 @@ if __name__ == "__main__":
             axes = axes.ravel()
         except:
             axes = [axes]"""
-        
+
+        str_nb_turns = f"_nb_turns_{nb_turns}" if nb_turns > 0 else ""
+
         for ind_prefix, prefix in enumerate(prefix_list):
-        
-            listing_filename = f"results/{circuit_prefix}_{prefix}" \
-                           f"_nb_turns_{nb_turns}" \
-                           f"{str_num_q}.listing"
+
+            listing_filename = f"results/{circuit_prefix}" \
+                               f"{str_dataset}" \
+                               f"_{prefix}" \
+                               f"{str_nb_turns}" \
+                               f"{str_num_q}.listing"
             if not os.path.exists(listing_filename):
                 print(listing_filename, "doesn't exist")
                 continue
-               
+
             for i, type_metric in enumerate(metrics):
 
                 if type_metric == "auc":
@@ -128,7 +134,8 @@ if __name__ == "__main__":
                 else:  # loss
                     val_list = get_train_loss_list(listing_filename)
 
-                axes[i, j].plot(val_list, label=prefix, linestyle=linestyles[ind_prefix])
+                axes[i, j].plot(val_list, label=prefix,
+                                linestyle=linestyles[ind_prefix])
                 axes[i, j].set_title(f"nb_turns = {nb_turns}, {circuit_prefix}")
                 axes[i, j].set_xlabel("nb of iterations")
                 axes[i, j].set_ylabel(type_metric)
@@ -139,8 +146,6 @@ if __name__ == "__main__":
                     axes[i, j].legend(loc='upper right')
     plt.tight_layout()
     plt.show()
-
-
 
 """
 ARCHIVE STRING
