@@ -1,13 +1,8 @@
 import prevision_quantum_nn as qnn
 import pennylane.numpy as np
+import matplotlib.pylab as plt
 
-if __name__ == "__main__":
-
-    # prepare data
-    data_sample_size = 1
-    X = 2 * np.pi * np.random.random((data_sample_size, 2))
-    dataset = qnn.get_dataset_from_numpy(X, np.zeros(data_sample_size))
-
+def get_metrics(backend, i):
     # todo: function get_model_params with all possible arguments,
     #  so that fields are automatically suggested
     # customize model
@@ -15,15 +10,16 @@ if __name__ == "__main__":
         "architecture": "qubit",
         "backend": "lightning.qubit",
         "encoding": "no_encoding",
+        "backend": backend,
         "layer_type": "template",
         "layer_name": "basic_circuit_6",
-        "num_q": 4,
+        "num_q": 1,
         "num_layers": 2,
         "double_mode": True,
     }
 
     descriptor_params = {
-        # "variables_sample_size": 100,
+        "variables_sample_size": i,
     }
 
     prefix = f"results/ct{model_params['layer_name'].split('_')[-1]}-" \
@@ -37,7 +33,25 @@ if __name__ == "__main__":
 
     expr = application.compute(dataset, "expressibility")
     ent = application.compute(dataset, "entangling_capability")
+    return expr, ent
 
-    print(prefix)
-    print(expr)
-    print(ent)
+if __name__ == "__main__":
+
+    # prepare data
+    data_sample_size = 1
+    X = 2 * np.pi * np.random.random((data_sample_size, 2))
+    dataset = qnn.get_dataset_from_numpy(X, np.zeros(data_sample_size))
+
+    metrics_pennylane = []
+    metrics= []
+
+    for i in range(1, 500):
+        metrics_pennylane.append(get_metrics("default.qubit.autograd", i)[0])
+        metrics.append(get_metrics("damavand.qubit", i)[0])
+
+    print(metrics_pennylane)
+    print(metrics)
+    plt.plot(metrics_pennylane, color="blueviolet", label="pennylane")
+    plt.plot(metrics, color="lime", label="damavand")
+    plt.legend()
+    plt.savefig("results.png")

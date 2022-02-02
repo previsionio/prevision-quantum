@@ -116,6 +116,7 @@ class DescriptorComputer:
         """
         self.num_q = num_q
         v_min, v_max = self.variables_range
+        self.backend = backend
 
         def variables_generator():
             return np.random.uniform(low=v_min, high=v_max,
@@ -169,10 +170,16 @@ class DescriptorComputer:
             var_theta = self.variables_generator()
             var_phi = self.variables_generator()
 
-            state_theta = circuit(var_theta, features=data)
-            state_phi = circuit(var_phi, features=data)
+            if self.backend == "damavand.qubit":
+                circuit(var_theta)
+                fid = circuit.device.get_fidelity_between_two_states_with_parameters(
+                        var_theta.flatten(),
+                        var_phi.flatten())
+            else:
+                state_theta = circuit(var_theta)
+                state_phi = circuit(var_phi)
 
-            fid = fidelity(state_theta, state_phi)
+                fid = fidelity(state_theta, state_phi)
 
             fids.append(fid)
 
