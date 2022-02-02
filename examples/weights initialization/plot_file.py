@@ -136,7 +136,10 @@ if __name__ == "__main__":
 
                 axes[i, j].plot(val_list, label=prefix,
                                 linestyle=linestyles[ind_prefix])
-                axes[i, j].set_title(f"nb_turns = {nb_turns}, {circuit_prefix}")
+                if nb_turns > 0:
+                    axes[i, j].set_title(f"nb_turns = {nb_turns}, {circuit_prefix}")
+                else:
+                    axes[i, j].set_title(f"{circuit_prefix}")
                 axes[i, j].set_xlabel("nb of iterations")
                 axes[i, j].set_ylabel(type_metric)
                 if type_metric == "auc":

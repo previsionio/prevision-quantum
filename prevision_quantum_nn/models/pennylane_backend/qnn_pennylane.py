@@ -218,6 +218,16 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
             var (array):weights of the model
         """
         if self.interface == "autograd":
+            """
+            g = get_gradient
+            norm_grad = np.linalg.norm(g(var))
+            var = list(var)
+            for i in range(num_layers):
+                var[i].requires_grad = True
+                for j in range(num_layers):
+                    if j != i :
+                    var[j].requires_grad = False
+            """
             var = self.optimizer.step(lambda v:
                                       self.cost(v, features, labels), var)
         elif self.interface == "tf":
@@ -273,7 +283,8 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
         while not stopping_criterion and self.iteration < self.max_iterations:
 
             if self.batch_size > 1:
-                x_train, y_train = self.get_random_batch(train_labels,
+                x_train, y_train = self.get_random_batch(train_features,
+                                                         train_labels,
                                                          self.batch_size)
             else:
                 x_train = train_features

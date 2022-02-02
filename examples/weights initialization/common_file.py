@@ -27,7 +27,7 @@ def main_function(variables_init_type, prefix, double_mode):
     # prepare data
     num_q = 4
     num_layers = 2
-    circuit = "basic_circuit_6"
+    circuit = "basic_circuit_5"
     dataset_name = "breast_cancer"
 
     if dataset_name == "spirals":
@@ -37,6 +37,7 @@ def main_function(variables_init_type, prefix, double_mode):
     prefix = f"results/circuit{circuit.split('_')[-1]}_dataset_{dataset_name}" \
              f"_{prefix}_num_q_{num_q}"
     random_state = 3+1
+    nb_turns = 0
 
     if dataset_name == "spirals":
         nb_turns = float(sys.argv[1])
@@ -65,7 +66,7 @@ def main_function(variables_init_type, prefix, double_mode):
                                          val_features=x_val, val_labels=y_val)
 
     preprocessing_params = {
-        # "polynomial_degree": 2
+         "polynomial_degree": 2
     }
 
     model_params = {
@@ -119,9 +120,14 @@ def main_function(variables_init_type, prefix, double_mode):
             acc = acc + 1
     accuracy = acc / len(y_test)
 
+    if nb_turns > 0:
+        str_details = f", nb_turns = {nb_turns}"
+    else:
+        str_details = f", dataset {dataset_name}"
+
     with open("results.txt", "a") as file:
         file.write(time.strftime("%m_%d_%H:%M:%S", time.gmtime()) + "\n")
-        file.write(f"id_block_init, nb_turns = {nb_turns}\n")
+        file.write(f"id_block_init{str_details}\n")
         file.write(f"auc = {auc},  accuracy = {accuracy}\n")
         file.write("\n")
 
