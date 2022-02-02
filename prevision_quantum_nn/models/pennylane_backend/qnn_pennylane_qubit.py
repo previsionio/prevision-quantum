@@ -108,7 +108,8 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
         """Checks backend consistency with interface """
         autograd_backends = ["default.qubit.autograd",
                              "default.qubit",
-                             "lightning.qubit"]
+                             "lightning.qubit",
+                             "damavand.qubit"]
         if self.interface == "autograd" and \
                 self.backend not in autograd_backends:
             self.backend = "default.qubit.autograd"
