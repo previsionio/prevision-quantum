@@ -2,13 +2,12 @@ import prevision_quantum_nn as qnn
 import pennylane.numpy as np
 import matplotlib.pylab as plt
 
+
 def get_metrics(backend, i):
-    # todo: function get_model_params with all possible arguments,
-    #  so that fields are automatically suggested
+
     # customize model
     model_params = {
         "architecture": "qubit",
-        "backend": "lightning.qubit",
         "encoding": "no_encoding",
         "backend": backend,
         "layer_type": "template",
@@ -35,6 +34,7 @@ def get_metrics(backend, i):
     ent = application.compute(dataset, "entangling_capability")
     return expr, ent
 
+
 if __name__ == "__main__":
 
     # prepare data
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     dataset = qnn.get_dataset_from_numpy(X, np.zeros(data_sample_size))
 
     metrics_pennylane = []
-    metrics= []
+    metrics = []
 
     for i in range(1, 500):
         metrics_pennylane.append(get_metrics("default.qubit.autograd", i)[0])
