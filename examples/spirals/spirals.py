@@ -2,11 +2,12 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 
 import prevision_quantum_nn as qnn
+import matplotlib.pyplot as plt
 
 
 def twospirals(turns, noise=0.7, random_state=None):
     """Returns the two spirals dataset."""
-    if random_state == None:
+    if random_state is None:
         rng_sp = np.random
     else:
         rng_sp = np.random.RandomState(random_state)
@@ -22,8 +23,18 @@ def twospirals(turns, noise=0.7, random_state=None):
 
 if __name__ == "__main__":
     # prepare data
-    nb_turns = 1.2
-    X, y = twospirals(nb_turns)
+    nb_turns = 1.0
+    X, y = twospirals(nb_turns, random_state=2)
+
+    figsize = (6, 6)
+    dpi = 300
+    plt.figure(figsize=figsize, dpi=dpi)
+    plt.scatter(X[y == 1, 0], X[y == 1,1])
+    plt.scatter(X[y == -1,0], X[y == -1,1])
+    plt.title(f'Spirals dataset with $turns={nb_turns}$')
+    plt.show()
+else:
+
     x_train, x_val, y_train, y_test = train_test_split(
         X, y, test_size=0.25, random_state=42)
 

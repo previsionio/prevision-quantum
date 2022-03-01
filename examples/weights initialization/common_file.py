@@ -25,7 +25,7 @@ def twospirals(turns, noise=0.7, random_state=0):
 
 def main_function(variables_init_type, prefix, double_mode):
     # prepare data
-    num_q = 4
+    num_q = 3
     num_layers = 2
     circuit = "basic_circuit_5"
     dataset_name = "breast_cancer"
@@ -66,7 +66,7 @@ def main_function(variables_init_type, prefix, double_mode):
                                          val_features=x_val, val_labels=y_val)
 
     preprocessing_params = {
-         "polynomial_degree": 2
+        # "polynomial_degree": 2
     }
 
     model_params = {

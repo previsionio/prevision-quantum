@@ -148,7 +148,7 @@ class PennylaneQubitNeuralNetwork(PennylaneNeuralNetwork):
                 var_init = np.random.uniform(low=low, high=high, size=var_shape)
             elif self.variables_init_type == "zeros":
                 var_init = 0.01 * np.random.randn(*var_shape)
-            else:
+            else:   # identity block strategy
                 var = 2 * np.pi * np.random.random(var_shape[:-1])
                 var_init = np.array([[var[i], -var[i]]
                                      for i in np.ndindex(var.shape)])
