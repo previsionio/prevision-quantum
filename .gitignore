@@ -1,4 +1,6 @@
 *.listing
+*_params.json
+*_preprocessor.obj
 *.result
 *.avi
 __pycache__
