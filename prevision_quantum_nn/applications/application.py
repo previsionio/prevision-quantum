@@ -12,7 +12,10 @@ from prevision_quantum_nn.models.pennylane_backend.qnn_pennylane_qubit import \
     PennylaneQubitNeuralNetwork
 from prevision_quantum_nn.postprocessing.postprocess import Postprocessor
 from prevision_quantum_nn.preprocessing.preprocess import Preprocessor
-from Levenshtein import distance as levenshtein_distance
+import sys
+
+if "Levenshtein" in sys.modules:
+    from Levenshtein import distance as levenshtein_distance
 
 
 class Application:
@@ -155,15 +158,16 @@ class Application:
         valid_params = set(valid_params)
         for param in params:
             if param not in valid_params:
-                candidate_params = []
-                cmp = lambda x: levenshtein_distance(x, param)
-                for valid_param in valid_params:
-                    if cmp(valid_param) <= 5 or valid_param.find(param) >= 0:
-                        candidate_params.append(valid_param)
-                candidate_params.sort(key=cmp)
                 suggestions_message = ""
-                if candidate_params:
-                    suggestions_message = f"Try with:\n" + \
-                                          "\n".join(candidate_params)
+                if "Levenshtein" in sys.modules:
+                    candidate_params = []
+                    cmp = lambda x: levenshtein_distance(x, param)
+                    for valid_param in valid_params:
+                        if cmp(valid_param) <= 5 or valid_param.find(param) >= 0:
+                            candidate_params.append(valid_param)
+                    candidate_params.sort(key=cmp)
+                    if candidate_params:
+                        suggestions_message = f"Try with:\n" + \
+                                              "\n".join(candidate_params)
                 raise ValueError(f"Parameter {param} is not valid. " +
                                  suggestions_message)
