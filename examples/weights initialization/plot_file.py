@@ -16,6 +16,10 @@ def get_val_loss_list(file_name):
     return get_info_list(file_name, "val_loss:")
 
 
+def get_grad_list(file_name):
+    return get_info_list(file_name, "grad:")
+
+
 def get_info_list(file_name, info):
     file = open(file_name, "r")
     a = []
@@ -84,7 +88,11 @@ if __name__ == "__main__":
     figsize = (16, 9)
 
     if type_metric == "all":
-        nrows = 3
+        metrics = ["auc", "train_loss", "val_loss", "grad"]
+    else:
+        metrics = [type_metric]
+    if type_metric == "all":
+        nrows = len(metrics)
         figsize = (5 * ncols, 10)
 
     dpi = 300
@@ -92,14 +100,12 @@ if __name__ == "__main__":
                              figsize=figsize)  # figsize=figsize, dpi=dpi)
     plt.rcParams.update({'font.size': 8})
 
-    if type_metric == "all":
-        metrics = ["auc", "train_loss", "val_loss"]
-    else:
-        metrics = [type_metric]
+    try:
+        if len(axes.shape) == 1:
+            axes.resize((len(axes), 1))
+    except:
+        None
 
-    if len(axes.shape) == 1:
-        axes.resize((len(axes), 1))
-    print(axes.shape)
     try:
         axes[0, 0]
     except:
@@ -129,6 +135,8 @@ if __name__ == "__main__":
 
                 if type_metric == "auc":
                     val_list = get_auc_list(listing_filename)
+                elif type_metric == "grad":
+                    val_list = get_grad_list(listing_filename)
                 elif type_metric == "val_loss":
                     val_list = get_val_loss_list(listing_filename)
                 else:  # loss
@@ -137,7 +145,8 @@ if __name__ == "__main__":
                 axes[i, j].plot(val_list, label=prefix,
                                 linestyle=linestyles[ind_prefix])
                 if nb_turns > 0:
-                    axes[i, j].set_title(f"nb_turns = {nb_turns}, {circuit_prefix}")
+                    axes[i, j].set_title(
+                        f"nb_turns = {nb_turns}, {circuit_prefix}")
                 else:
                     axes[i, j].set_title(f"{circuit_prefix}")
                 axes[i, j].set_xlabel("nb of iterations")
@@ -147,6 +156,9 @@ if __name__ == "__main__":
                     axes[i, j].legend(loc='lower right')
                 else:  # loss
                     axes[i, j].legend(loc='upper right')
+                if type_metric == "grad":
+                    axes[i, j].set_yscale('log')
+
     plt.tight_layout()
     plt.show()
 
