@@ -8,6 +8,7 @@ import linecache
 import pennylane as qml
 import pennylane.numpy as np
 import tensorflow as tf
+from pennylane._grad import grad as get_gradient
 
 from prevision_quantum_nn.models.qnn import QuantumNeuralNetwork
 from prevision_quantum_nn.models.utilities.losses \
@@ -66,6 +67,10 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
         self.dev = None
         self.neural_network = lambda *_, **__: None
         self.backend = None
+        self.training_type = self.params.get("training_type","default")
+        self.layerwise_learning = self.training_type == "layerwise"
+        self.layerwise_learning_period = self.params.get(
+                                        "layerwise_learning_period", "default")
 
     @staticmethod
     def get_params_attributes():
@@ -77,7 +82,9 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
                 "optimizer_name",
                 "interface",
                 "layer_type",
-                "encoding"]
+                "encoding",
+                "training_type",
+                "layerwise_learning_period"]
 
     def initialize_weights(self, weights_file=None):
         """ initialize weights
@@ -165,7 +172,7 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
             else:
                 self.var = tf.Variable(self.var)
 
-    def cost(self, var, features, labels):
+    def cost(self, features, labels, var):
         """Cost to be optimized during training.
 
         Args:
@@ -209,30 +216,48 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
                 loss = tf.math.reduce_mean(tf.losses.MSE(labels, model_output))
         return loss
 
-    def step(self, features, labels, var):
+    def step(self, features, labels, var, norm_grad=False):
         """Performs one step of training.
 
         Args:
             features(array):observations
             labels(array):labels
             var (array):weights of the model
+            index_grad(list):list of index to compute gradient
         """
         if self.interface == "autograd":
-            """
-            g = get_gradient
-            norm_grad = np.linalg.norm(g(var))
-            var = list(var)
-            for i in range(num_layers):
-                var[i].requires_grad = True
-                for j in range(num_layers):
-                    if j != i :
-                    var[j].requires_grad = False
-            """
-            var = self.optimizer.step(lambda v:
-                                      self.cost(v, features, labels), var)
+            if self.layerwise_learning:
+                var = list(var)
+                i = (self.iteration // 20) % self.num_layers
+
+                def objective_cost(*v):
+                    return self.cost(features, labels, v)
+
+                for j in range(len(var)):
+                    if j == i:
+                        var[j].requires_grad = True
+                    else:
+                        var[j].requires_grad = False
+                var = self.optimizer.step(objective_cost, *var)
+                var = np.array(var)
+
+                if norm_grad:
+                    g = get_gradient(objective_cost)(var)
+                    return var, np.linalg.norm(g)
+
+            else:
+                def objective_cost(v):
+                    return self.cost(features, labels, v)
+
+                var = self.optimizer.step(objective_cost, var)
+
+                if norm_grad:
+                    g = get_gradient(objective_cost)(var)
+                    return var, np.linalg.norm(g)
+
         elif self.interface == "tf":
             with tf.GradientTape() as tape:
-                loss = self.cost(var, features, labels)
+                loss = self.cost(features, labels, var)
                 # FIXME
                 # due to pennylane layer templating
                 # in CV, we got lists of tf.Variable
@@ -290,7 +315,12 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
                 x_train = train_features
                 y_train = train_labels
 
-            var = self.step(x_train, y_train, var)
+            norm_grad = True
+            if norm_grad:
+                var, norm_g = self.step(x_train, y_train, var, True)
+            else:
+                var = self.step(x_train, y_train, var)
+                norm_g = None
 
             if self.backend == "strawberryfields.tf":
                 linecache.clearcache()
@@ -298,9 +328,8 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
             # early stopper
             val_loss = None
             if val_features is not None:
-                val_loss = np.asscalar(np.array(self.cost(var,
-                                                          val_features,
-                                                          val_labels)))
+                val_loss = np.asscalar(np.array(
+                    self.cost(val_features, val_labels, var)))
                 if self.early_stopper and \
                         self.iteration > 2 * self.early_stopper_patience:
                     stopping_criterion = \
@@ -308,13 +337,13 @@ class PennylaneNeuralNetwork(QuantumNeuralNetwork):
 
             # dump output
             if verbose:
-                train_loss = np.asscalar(np.array(self.cost(var,
-                                                            x_train,
-                                                            y_train)))
+                train_loss = np.asscalar(np.array(
+                    self.cost(x_train, y_train, var)))
                 self.logging_iteration(val_features,
                                        val_labels,
                                        train_loss,
-                                       val_loss)
+                                       val_loss,
+                                       norm_g)
 
             # if snapshot enabled, save weights in file
             if self.snapshot_frequency > 0 and \

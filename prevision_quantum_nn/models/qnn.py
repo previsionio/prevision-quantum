@@ -217,7 +217,8 @@ class QuantumNeuralNetwork:
                           val_features,
                           val_labels,
                           train_loss,
-                          val_loss):
+                          val_loss,
+                          norm_grad=None):
         """Dumps information during training.
 
         Args:
@@ -225,6 +226,7 @@ class QuantumNeuralNetwork:
             val_labels (array):validation labels
             train_loss (float):loss of the current iteration
             val_loss (float):validation loss of the current iteration
+            norm_grad (float): norm of the gradient of the current iteration
         """
 
         if val_features is not None and \
@@ -234,10 +236,15 @@ class QuantumNeuralNetwork:
                 predicted_probabilities = self.predict_proba(val_features)
                 auc = metrics.roc_auc_score(val_labels,
                                             predicted_probabilities)
+                if norm_grad is None:
+                    str_norm_grad = ""
+                else:
+                    str_norm_grad = f"grad: {norm_grad:.5f}"
                 self.logger.info(f"iter: {self.iteration} "
                                  f"train_loss: {train_loss:.3e} "
                                  f"val_loss: {val_loss:.3e} "
-                                 f"auc: {auc:.5f}")
+                                 f"auc: {auc:.5f} "
+                                 f"{str_norm_grad} ")
 
             # multiclassification
             elif self.type_problem == "multiclassification":
